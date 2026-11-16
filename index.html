@@ -41,7 +41,7 @@ const realms=[
 {name:"大乘期",start:68,end:76,area:"仙門遺址",exp:1350,hp:24500,atk:440,spawn:.7},
 {name:"渡劫期",start:77,end:100,area:"天劫之地",exp:2100,hp:52000,atk:700,spawn:.66}
 ];
-const state={level:1,xp:0,xpNeed:90,hp:100,maxHp:100,atk:12,def:2,attackSpeed:1,castSpeed:1,moveSpeed:1,crit:5,lifeSteal:0,skills:["劍氣斬"],talents:[],inventory:[],kills:0,totalXp:0,lastStat:Date.now(),recentKills:0,expPerHour:0,activeTab:null,spawnAt:0,attackAt:0,skillTimers:{},player:{x:0,y:0,angle:0},enemies:[],effects:[],boss:null};
+const state={level:1,xp:0,xpNeed:90,hp:100,maxHp:100,atk:12,def:2,attackSpeed:1,castSpeed:1,moveSpeed:1,crit:5,lifeSteal:0,skills:["劍氣斬"],talents:[],inventory:[],kills:0,totalXp:0,lastStat:Date.now(),recentKills:0,expPerHour:0,activeTab:null,spawnAt:0,attackAt:0,skillTimers:{},player:{x:0,y:0,angle:0},enemies:[],effects:[],projectiles:[],boss:null};
 const skillDefs=[
 {name:"劍氣斬",desc:"每 2.4 秒自動斬出劍氣，造成 180% 攻擊傷害。",cd:2.4},
 {name:"雷球術",desc:"每 6 秒自動釋放雷球，最多連鎖 4 個敵人。",cd:6},
@@ -69,7 +69,7 @@ const gearPool=[
 {name:"雷紋護符",slot:"ring",rarity:"legend",desc:"攻擊力 +9，雷擊可額外連鎖。",atk:9,proc:"雷鏈"}
 ];
 let W=0,H=0,last=0,app=null,worldLayer=null,glowLayer=null,fxLayer=null;
-const particlePool=[];
+const particlePool=[];const floatingTexts=[];
 class ParticleEmitter{
  constructor(){this.items=[]}
  emit(x,y,color,count=8,power=70){for(let i=0;i<count;i++){const a=Math.random()*Math.PI*2,v=power*(.25+Math.random()*.75);this.items.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:.35+Math.random()*.35,max:.7,color,size:1.5+Math.random()*3})}}
@@ -80,7 +80,7 @@ const particles=new ParticleEmitter();
 async function setupRenderer(){
  if(!window.PIXI){feed("渲染引擎載入失敗，請確認網路連線後重新整理。");return false}
  app=new PIXI.Application();
- await app.init({resizeTo:world,background:"#17231f",antialias:true,resolution:Math.min(window.devicePixelRatio||1,2),autoDensity:true,powerPreference:"high-performance"});
+ await app.init({resizeTo:world,background:"#17231f",antialias:true,resolution:Math.min(window.devicePixelRatio||1,2),autoDensity:true,powerPreference:"high-performance",autoStart:false,sharedTicker:false});
  world.replaceChildren(app.canvas);app.canvas.style.width="100%";app.canvas.style.height="100%";app.canvas.style.display="block";
  worldLayer=new PIXI.Graphics();glowLayer=new PIXI.Graphics();fxLayer=new PIXI.Graphics();
  app.stage.addChild(worldLayer,glowLayer,fxLayer);
@@ -102,11 +102,14 @@ function dropGear(){const g={...gearPool[Math.floor(Math.random()*gearPool.lengt
 function equip(g){state.inventory.forEach(x=>{if(x.slot===g.slot)x.equipped=false});g.equipped=true;recalc();feed("已裝備："+g.name);renderPanel();updateHud()}
 function spawnEnemy(){const r=realm(),a=Math.random()*Math.PI*2,d=Math.max(W,H)*(.48+Math.random()*.18),boss=state.kills>0&&state.kills%80===0&&!state.boss,m=1+realmIndex()*.48,e={x:Math.max(15,Math.min(W-15,state.player.x+Math.cos(a)*d)),y:Math.max(85,Math.min(H-30,state.player.y+Math.sin(a)*d)),hp:r.hp*m*(boss?12:1),max:r.hp*m*(boss?12:1),atk:r.atk*m,boss,hit:0};if(boss){state.boss=e;$("bossbar").style.display="block";$("bossname").textContent="秘境首領・山魈王"}state.enemies.push(e)}
 function nearest(){let best=null,bd=Infinity;for(const e of state.enemies){const d=Math.hypot(e.x-state.player.x,e.y-state.player.y);if(d<bd){bd=d;best=e}}return best}
-function damage(e,n,color="#f4d18a"){if(!state.enemies.includes(e))return;e.hp-=n;e.hit=.15;particles.emit(e.x,e.y,color,7,85);state.effects.push({x:e.x,y:e.y-12,text:"-"+Math.round(n),life:.7,color});if(e.hp<=0)kill(e)}
+function damage(e,n,color="#f4d18a"){if(!state.enemies.includes(e))return;e.hp-=n;e.hit=.15;particles.emit(e.x,e.y,color,7,85);state.effects.push({x:e.x,y:e.y-12,text:"-"+Math.round(n),life:.7,color});if(app){const label=new PIXI.Text({text:"-"+Math.round(n),style:{fontFamily:"Arial",fontSize:13,fontWeight:"bold",fill:color,stroke:{color:"#10151d",width:3}}});label.anchor.set(.5);label.x=e.x;label.y=e.y-18;app.stage.addChild(label);floatingTexts.push({node:label,life:.72,max:.72})}if(e.hp<=0)kill(e)}
 function kill(e){const idx=state.enemies.indexOf(e);if(idx<0)return;state.enemies.splice(idx,1);if(e.boss){state.boss=null;$("bossbar").style.display="none";feed("擊敗秘境首領！獲得額外獎勵。");dropGear();dropGear()}state.kills++;state.recentKills++;addXp(realm().exp*(e.boss?15:1));if(Math.random()<.12||e.boss)dropGear();if(state.lifeSteal>0)state.hp=Math.min(state.maxHp,state.hp+state.maxHp*state.lifeSteal);if(state.skills.includes("吸靈訣"))state.hp=Math.min(state.maxHp,state.hp+2)}
 function playerAttack(t){particles.emit(state.player.x,state.player.y,"#a9d8ff",5,55);const d=state.atk*(Math.random()*100<state.crit?2:1);damage(t,d);state.effects.push({x:(state.player.x+t.x)/2,y:(state.player.y+t.y)/2,text:"✦",life:.22,color:"#a9d8ff"});if(state.inventory.some(g=>g.equipped&&g.proc==="雷擊")&&Math.random()<.22)damage(t,state.atk*.8,"#8fdcff");if(state.inventory.some(g=>g.equipped&&g.proc==="分光")){const other=state.enemies.find(e=>e!==t&&Math.hypot(e.x-t.x,e.y-t.y)<120);if(other)damage(other,state.atk*.55,"#a9d8ff")}}
-function castSkills(t,now){if(!t)return;const active=(name,cd,fn)=>{if(state.skills.includes(name)&&now-(state.skillTimers[name]||0)>cd*1000/state.castSpeed){state.skillTimers[name]=now;fn()}};active("劍氣斬",2.4,()=>{damage(t,state.atk*1.8,"#a9d8ff");state.effects.push({x:t.x,y:t.y,text:"劍氣",life:.5,color:"#b7e2ff"})});active("雷球術",6,()=>{state.enemies.slice(0,4).forEach((e,i)=>damage(e,state.atk*1.25*(1-i*.12),"#8fdcff"));feed("雷球術引發連鎖雷擊！")});active("飛劍追擊",3.8,()=>damage(t,state.atk*1.1,"#b7e2ff"));active("護體靈盾",18,()=>{if(state.hp<state.maxHp*.45){state.hp=Math.min(state.maxHp,state.hp+state.maxHp*.18);feed("護體靈盾自動恢復氣血。")}else state.skillTimers["護體靈盾"]=now-17000})}
-function step(dt,now){const p=state.player,t=nearest();if(!state.boss&&state.enemies.length<12&&now-state.spawnAt>realm().spawn*1000){spawnEnemy();state.spawnAt=now}if(t){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy)||1;p.angle=Math.atan2(dy,dx);if(d>42){p.x+=dx/d*state.moveSpeed*55*dt;p.y+=dy/d*state.moveSpeed*55*dt;p.x=Math.max(12,Math.min(W-12,p.x));p.y=Math.max(80,Math.min(H-12,p.y))}else if(now-state.attackAt>720/state.attackSpeed){state.attackAt=now;playerAttack(t)}castSkills(t,now)}for(const e of [...state.enemies]){const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;if(d>35){e.x+=dx/d*18*dt;e.y+=dy/d*18*dt}else if(now-(e.lastHit||0)>1200){e.lastHit=now;state.hp-=Math.max(1,e.atk-state.def);state.effects.push({x:p.x,y:p.y-18,text:"受擊",life:.5,color:"#ff9999"});if(state.hp<=0){state.hp=state.maxHp*.55;state.enemies=[];feed("修士重傷，靈力護持後撤回秘境入口。")}}if(e.boss)$("bossHp").style.width=Math.max(0,e.hp/e.max*100)+"%"}state.effects=state.effects.filter(f=>{f.life-=dt;return f.life>0});state.enemies.forEach(e=>e.hit=Math.max(0,e.hit-dt));if(now-state.lastStat>5000){state.expPerHour=state.recentKills*realm().exp*720;state.recentKills=0;state.lastStat=now;updateHud()}}
+function visualProjectile(target,color="#a9d8ff",speed=430,size=5){if(!target)return;state.projectiles.push({x:state.player.x,y:state.player.y,target,color,speed,size,life:1.8})}
+function castSkills(t,now){if(!t)return;const active=(name,cd,fn)=>{if(state.skills.includes(name)&&now-(state.skillTimers[name]||0)>cd*1000/state.castSpeed){state.skillTimers[name]=now;fn()}};active("劍氣斬",2.4,()=>{visualProjectile(t,"#a9d8ff",520,7);damage(t,state.atk*1.8,"#a9d8ff");state.effects.push({x:t.x,y:t.y,text:"劍氣",life:.5,color:"#b7e2ff"})});active("雷球術",6,()=>{state.enemies.slice(0,4).forEach((e,i)=>{visualProjectile(e,"#a78bfa",620,6);damage(e,state.atk*1.25*(1-i*.12),"#8fdcff")});feed("雷球術引發連鎖雷擊！")});active("飛劍追擊",3.8,()=>{visualProjectile(t,"#d9eaff",700,4);damage(t,state.atk*1.1,"#b7e2ff")});active("護體靈盾",18,()=>{if(state.hp<state.maxHp*.45){state.hp=Math.min(state.maxHp,state.hp+state.maxHp*.18);feed("護體靈盾自動恢復氣血。")}else state.skillTimers["護體靈盾"]=now-17000})}
+function step(dt,now){const p=state.player,t=nearest();
+ state.projectiles=state.projectiles.filter(q=>{q.life-=dt;if(!state.enemies.includes(q.target))return false;const dx=q.target.x-q.x,dy=q.target.y-q.y,d=Math.hypot(dx,dy)||1,move=Math.min(d,q.speed*dt);q.x+=dx/d*move;q.y+=dy/d*move;return q.life>0&&d>7});
+ for(const f of floatingTexts){f.life-=dt;f.node.y-=dt*24;f.node.alpha=Math.max(0,f.life/f.max)}for(let i=floatingTexts.length-1;i>=0;i--)if(floatingTexts[i].life<=0){app?.stage.removeChild(floatingTexts[i].node);floatingTexts[i].node.destroy();floatingTexts.splice(i,1)}if(!state.boss&&state.enemies.length<12&&now-state.spawnAt>realm().spawn*1000){spawnEnemy();state.spawnAt=now}if(t){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy)||1;p.angle=Math.atan2(dy,dx);if(d>42){p.x+=dx/d*state.moveSpeed*55*dt;p.y+=dy/d*state.moveSpeed*55*dt;p.x=Math.max(12,Math.min(W-12,p.x));p.y=Math.max(80,Math.min(H-12,p.y))}else if(now-state.attackAt>720/state.attackSpeed){state.attackAt=now;playerAttack(t)}castSkills(t,now)}for(const e of [...state.enemies]){const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;if(d>35){e.x+=dx/d*18*dt;e.y+=dy/d*18*dt}else if(now-(e.lastHit||0)>1200){e.lastHit=now;state.hp-=Math.max(1,e.atk-state.def);state.effects.push({x:p.x,y:p.y-18,text:"受擊",life:.5,color:"#ff9999"});if(state.hp<=0){state.hp=state.maxHp*.55;state.enemies=[];feed("修士重傷，靈力護持後撤回秘境入口。")}}if(e.boss)$("bossHp").style.width=Math.max(0,e.hp/e.max*100)+"%"}state.effects=state.effects.filter(f=>{f.life-=dt;return f.life>0});state.enemies.forEach(e=>e.hit=Math.max(0,e.hit-dt));if(now-state.lastStat>5000){state.expPerHour=state.recentKills*realm().exp*720;state.recentKills=0;state.lastStat=now;updateHud()}}
 function draw(dt=0){
  if(!app||!worldLayer)return;
  const g=worldLayer,gl=glowLayer,fx=fxLayer;g.clear();gl.clear();fx.clear();
@@ -129,6 +132,7 @@ function draw(dt=0){
  g.circle(p.x,p.y,10).fill("#28465d");g.circle(p.x,p.y-2,7).fill("#7caecb");
  const tipX=p.x+Math.cos(p.angle)*20,tipY=p.y+Math.sin(p.angle)*20;
  g.moveTo(p.x+Math.cos(p.angle+2.4)*8,p.y+Math.sin(p.angle+2.4)*8).lineTo(tipX,tipY).lineTo(p.x+Math.cos(p.angle-2.4)*8,p.y+Math.sin(p.angle-2.4)*8).stroke({color:"#f0d28b",width:3});
+ for(const q of state.projectiles){gl.circle(q.x,q.y,q.size*3).fill({color:q.color,alpha:.28});fx.circle(q.x,q.y,q.size).fill(q.color);fx.circle(q.x,q.y,q.size*.45).fill("#ffffff")}
  particles.draw(fx);
  for(const f of state.effects){const alpha=Math.min(1,f.life*2);fx.circle(f.x,f.y,7+f.life*8).fill({color:f.color,alpha:alpha*.18});}
  app.renderer.render(app.stage);
