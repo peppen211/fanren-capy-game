@@ -147,13 +147,15 @@ function draw(dt=0){
  for(let i=0;i<34;i++){const x=(i*173+41)%Math.max(1,W),y=(i*227+29)%Math.max(1,H),rx=24+(i%6)*10,ry=12+(i%4)*7;g.ellipse(x,y,rx,ry).fill({color:i%3===0?"#344a35":i%3===1?"#253d30":"#1d342a",alpha:.26+(i%3)*.035});}
  // Dense canopy shadows frame the playable clearing instead of a visible grid.
  for(let i=0;i<22;i++){const side=i%2,yy=(i*83+25)%Math.max(1,H),xx=side?W-8:8;g.ellipse(xx,yy,34+(i%4)*8,45+(i%3)*12).fill({color:"#0a1714",alpha:.34});g.ellipse(xx+(side?-13:13),yy-10,22,31).fill({color:"#294332",alpha:.48});}
+ // Framing ancient trees: layered crowns, trunks, rim light and exposed roots.
+ for(let i=0;i<8;i++){const side=i%2,x=side?W-20:20,y=(i*137+65)%Math.max(1,H),r=17+(i%3)*5;g.ellipse(x+3,y+13,r*1.25,r*.48).fill({color:"#07110e",alpha:.46});g.roundRect(x-4,y-3,8,25,4).fill({color:"#554a35",alpha:.72});g.ellipse(x,y-8,r*1.15,r*.92).fill({color:"#203b2c",alpha:.96});g.ellipse(x-(side?-5:5),y-13,r*.72,r*.65).fill({color:"#31543a",alpha:.92});g.ellipse(x+6,y-7,r*.48,r*.42).fill({color:"#476b43",alpha:.72});g.arc(x,y-8,r*.9,.25,2.65).stroke({color:"#78905a",width:1.5,alpha:.34});g.moveTo(x,y+14).lineTo(x+(side?-13:13),y+22).stroke({color:"#5a6846",width:2.5,alpha:.62});}
  // Broken old flagstones, mossy edges and scattered pebbles.
  for(let i=0;i<13;i++){const x=(i*97+23)%Math.max(1,W),y=(i*151+117)%Math.max(1,H),rw=17+(i%4)*9,rh=7+(i%3)*5;g.roundRect(x,y,rw,rh,4).fill({color:"#69705b",alpha:.23});g.roundRect(x+2,y+1,rw*.55,rh*.22,2).fill({color:"#b0a985",alpha:.18});g.circle(x+rw+5,y+rh+3,1.8+i%2).fill({color:"#8c9a70",alpha:.38});}
  // Exposed roots and fern-like ground growth.
  for(let i=0;i<9;i++){const x=(i*139+56)%Math.max(1,W),y=(i*193+175)%Math.max(1,H);g.moveTo(x-27,y+17).bezierCurveTo(x-10,y-3,x+8,y+8,x+29,y-22).stroke({color:"#59664a",alpha:.42,width:3.5});g.moveTo(x-13,y+8).lineTo(x-28,y-5).stroke({color:"#65734e",alpha:.36,width:2});g.moveTo(x+7,y+3).lineTo(x+19,y+15).stroke({color:"#65734e",alpha:.32,width:2});}
  for(let i=0;i<46;i++){const x=(i*71+19)%Math.max(1,W),y=(i*127+37)%Math.max(1,H);g.moveTo(x,y+4).quadraticCurveTo(x-3,y-3,x-7,y-8).stroke({color:"#779064",alpha:.36,width:1.6});g.moveTo(x,y+4).quadraticCurveTo(x+2,y-5,x+8,y-9).stroke({color:"#91a575",alpha:.32,width:1.6});}
  // Fireflies and tiny spirit flowers add depth without cluttering the combat lane.
- for(let i=0;i<15;i++){const x=(i*181+83)%Math.max(1,W),y=(i*239+61)%Math.max(1,H);g.circle(x,y,5).fill({color:"#b6d98b",alpha:.055});g.circle(x,y,1.7).fill({color:"#c9e8a0",alpha:.56});g.circle(x-1,y-1,0.7).fill({color:"#f0f3c0",alpha:.75});}
+ for(let i=0;i<15;i++){const x=(i*181+83)%Math.max(1,W),y=(i*239+61)%Math.max(1,H),pulse=.65+.35*Math.sin(performance.now()*.0018+i*1.7);gl.circle(x,y,5+pulse*2).fill({color:"#b6d98b",alpha:.055});gl.circle(x,y,1.7+pulse*.7).fill({color:"#c9e8a0",alpha:.42+pulse*.2});gl.circle(x-1,y-1,.7).fill({color:"#f0f3c0",alpha:.75});}
  // Subtle vignette at the edges.
  g.rect(0,0,W,18).fill({color:"#07110f",alpha:.20});g.rect(0,H-20,W,20).fill({color:"#07110f",alpha:.24});
  const alive=new Set();
