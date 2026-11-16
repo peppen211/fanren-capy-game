@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="104" height="120" viewBox="0 0 104 120">
+<defs><linearGradient id="mist" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e2ffff" stop-opacity=".98"/><stop offset=".48" stop-color="#78c7d2" stop-opacity=".85"/><stop offset="1" stop-color="#2e718c" stop-opacity=".18"/></linearGradient><radialGradient id="core"><stop stop-color="#d9ffff" stop-opacity=".8"/><stop offset="1" stop-color="#7ce5f1" stop-opacity="0"/></radialGradient></defs>
+<ellipse cx="52" cy="109" rx="28" ry="6" fill="#07121a" opacity=".48"/>
+<ellipse cx="52" cy="58" rx="44" ry="48" fill="url(#core)"/>
+<path d="M52 7 72 20 83 43 75 70 94 94 72 88 57 109 43 89 14 99 30 70 20 42 31 20Z" fill="url(#mist)" stroke="#baf5f6" stroke-width="2.5"/>
+<path d="m31 29 21-23 22 24-8 25H39Z" fill="#24556b" stroke="#d2ffff" stroke-width="2"/>
+<path d="m38 42 8 2m13 0 8-2" stroke="#e0ffff" stroke-width="5" stroke-linecap="round"/>
+<path d="m42 58 10 7 11-7" fill="none" stroke="#e3ffff" stroke-width="2.5"/>
+<path d="M27 58 11 76m54-18 25 17" stroke="#9ee8ee" stroke-width="6" stroke-linecap="round"/>
+<path d="m52 15-1-11m-11 16-9-8m31 8 10-8" stroke="#e1ffff" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="52" cy="79" r="7" fill="#bafaff" opacity=".42"/>
+</svg>
