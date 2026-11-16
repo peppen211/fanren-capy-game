@@ -159,6 +159,7 @@ function draw(dt=0){
  const alive=new Set();
  for(const e of state.enemies){
    alive.add(e);
+   if((e.attackTell||0)>.42){const tell=Math.min(1,((e.attackTell||0)-.42)/.4);gl.circle(e.x,e.y+4,19+tell*7).stroke({color:"#ff987c",width:1.5+tell,alpha:.18+tell*.38});}
    let node=spriteNodes.get(e);
    if(!node){node=new PIXI.Sprite(artTextures[e.type]||artTextures.wolf);node.anchor.set(.5,.72);node.width=e.boss?58:36;node.height=e.boss?58:38;node._baseScaleX=node.scale.x;node._baseScaleY=node.scale.y;spriteLayer.addChild(node);spriteNodes.set(e,node)}
    node.x=e.x;node.y=e.y+Math.sin((e.anim||0))*2.2;node.scale.set(node._baseScaleX*(e.facing===-1?-1:1),node._baseScaleY*(1+Math.sin((e.anim||0)*2)*.012));node.alpha=e.hit>0?1:.96;node.tint=e.hit>0?0xffffff:0xffffff;node.x+=e.hit>0?Math.sin(performance.now()*.09)*1.5:0;const bob=Math.sin((e.anim||0)*1.7);node.y+=bob*(e.type==="wraith"?3:1.3);node.rotation=Math.sin((e.anim||0)*.7)*(e.type==="wraith"?.055:.025);
@@ -171,7 +172,7 @@ function draw(dt=0){
  if(p.swing>0){const a=p.angle,progress=1-p.swing/.22;gl.arc(p.x,p.y,21,a-1.05+progress*.25,a+1.05+progress*.25).stroke({color:"#ffe2a0",width:5,alpha:Math.sin(progress*Math.PI)*.68});fx.arc(p.x,p.y,20,a-1.05+progress*.25,a+1.05+progress*.25).stroke({color:"#fff4c9",width:2,alpha:Math.sin(progress*Math.PI)})}
  for(const q of state.projectiles){gl.circle(q.x,q.y,q.size*3).fill({color:q.color,alpha:.32});fx.circle(q.x,q.y,q.size).fill(q.color);fx.circle(q.x,q.y,q.size*.45).fill("#ffffff")}
  particles.draw(fx);
- for(const f of state.effects){const alpha=Math.min(1,f.life*2);if(f.ring){const radius=(.42-f.life)*78;gl.circle(f.x,f.y,radius).stroke({color:f.color,width:2.5,alpha:alpha*.72});gl.circle(f.x,f.y,radius*.68).stroke({color:f.color,width:1,alpha:alpha*.32})}else if(f.slash){const a=f.angle||0;fx.arc(f.x,f.y,30,a-.95,a+.95).stroke({color:"#dff8ff",width:5,alpha:alpha*.9});gl.arc(f.x,f.y,36,a-.9,a+.9).stroke({color:"#8ed8f1",width:9,alpha:alpha*.24})}else{fx.circle(f.x,f.y,7+f.life*8).fill({color:f.color,alpha:alpha*.18});if(f.text){const label=new PIXI.Text({text:f.text,style:{fontFamily:"Arial",fontSize:11,fontWeight:"bold",fill:f.color,stroke:{color:"#0b141b",width:3}}});label.anchor.set(.5);label.x=f.x;label.y=f.y-12;label.alpha=alpha*.8;app.stage.addChild(label);floatingTexts.push({node:label,life:Math.min(.25,f.life),max:Math.min(.25,f.life)})}}}
+ for(const f of state.effects){const alpha=Math.min(1,f.life*2);if(f.ring){const radius=(.42-f.life)*78;gl.circle(f.x,f.y,radius).stroke({color:f.color,width:2.5,alpha:alpha*.72});gl.circle(f.x,f.y,radius*.68).stroke({color:f.color,width:1,alpha:alpha*.32})}else if(f.slash){const a=f.angle||0;fx.arc(f.x,f.y,30,a-.95,a+.95).stroke({color:"#dff8ff",width:5,alpha:alpha*.9});gl.arc(f.x,f.y,36,a-.9,a+.9).stroke({color:"#8ed8f1",width:9,alpha:alpha*.24})}else{fx.circle(f.x,f.y,7+f.life*8).fill({color:f.color,alpha:alpha*.18})}}
  app.renderer.render(app.stage);
 }
 function loop(now){const dt=Math.min(.05,(now-last)/1000||0);last=now;step(dt,now);particles.update(dt);draw(dt);updateHud();requestAnimationFrame(loop)}
