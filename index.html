@@ -41,7 +41,7 @@ const realms=[
 {name:"大乘期",start:68,end:76,area:"仙門遺址",exp:1350,hp:24500,atk:440,spawn:.7},
 {name:"渡劫期",start:77,end:100,area:"天劫之地",exp:2100,hp:52000,atk:700,spawn:.66}
 ];
-const state={level:1,xp:0,xpNeed:90,hp:100,maxHp:100,atk:12,def:2,attackSpeed:1,castSpeed:1,moveSpeed:1,crit:5,lifeSteal:0,skills:["劍氣斬"],talents:[],inventory:[],kills:0,totalXp:0,lastStat:Date.now(),recentKills:0,expPerHour:0,activeTab:null,spawnAt:0,attackAt:0,skillTimers:{},player:{x:0,y:0,angle:0},enemies:[],effects:[],projectiles:[],boss:null};
+const state={level:1,xp:0,xpNeed:90,hp:100,maxHp:100,atk:12,def:2,attackSpeed:1,castSpeed:1,moveSpeed:1,crit:5,lifeSteal:0,skills:["劍氣斬"],talents:[],inventory:[],kills:0,totalXp:0,lastStat:Date.now(),recentKills:0,expPerHour:0,activeTab:null,spawnAt:0,attackAt:0,skillTimers:{},player:{x:0,y:0,angle:0,moving:false,anim:0},enemies:[],effects:[],projectiles:[],boss:null};
 const skillDefs=[
 {name:"劍氣斬",desc:"每 2.4 秒自動斬出劍氣，造成 180% 攻擊傷害。",cd:2.4},
 {name:"雷球術",desc:"每 6 秒自動釋放雷球，最多連鎖 4 個敵人。",cd:6},
@@ -118,7 +118,7 @@ function visualProjectile(target,color="#a9d8ff",speed=430,size=5){if(!target)re
 function castSkills(t,now){if(!t)return;const active=(name,cd,fn)=>{if(state.skills.includes(name)&&now-(state.skillTimers[name]||0)>cd*1000/state.castSpeed){state.skillTimers[name]=now;fn()}};active("劍氣斬",2.4,()=>{visualProjectile(t,"#a9d8ff",520,7);damage(t,state.atk*1.8,"#a9d8ff");state.effects.push({x:t.x,y:t.y,text:"劍氣",life:.5,color:"#b7e2ff"})});active("雷球術",6,()=>{state.enemies.slice(0,4).forEach((e,i)=>{visualProjectile(e,"#a78bfa",620,6);damage(e,state.atk*1.25*(1-i*.12),"#8fdcff")});feed("雷球術引發連鎖雷擊！")});active("飛劍追擊",3.8,()=>{visualProjectile(t,"#d9eaff",700,4);damage(t,state.atk*1.1,"#b7e2ff")});active("護體靈盾",18,()=>{if(state.hp<state.maxHp*.45){state.hp=Math.min(state.maxHp,state.hp+state.maxHp*.18);feed("護體靈盾自動恢復氣血。")}else state.skillTimers["護體靈盾"]=now-17000})}
 function step(dt,now){const p=state.player,t=nearest();
  state.projectiles=state.projectiles.filter(q=>{q.life-=dt;if(!state.enemies.includes(q.target))return false;const dx=q.target.x-q.x,dy=q.target.y-q.y,d=Math.hypot(dx,dy)||1,move=Math.min(d,q.speed*dt);q.x+=dx/d*move;q.y+=dy/d*move;return q.life>0&&d>7});
- for(const f of floatingTexts){f.life-=dt;f.node.y-=dt*24;f.node.alpha=Math.max(0,f.life/f.max)}for(let i=floatingTexts.length-1;i>=0;i--)if(floatingTexts[i].life<=0){app?.stage.removeChild(floatingTexts[i].node);floatingTexts[i].node.destroy();floatingTexts.splice(i,1)}if(!state.boss&&state.enemies.length<12&&now-state.spawnAt>realm().spawn*1000){spawnEnemy();state.spawnAt=now}if(t){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy)||1;p.angle=Math.atan2(dy,dx);if(d>42){p.x+=dx/d*state.moveSpeed*55*dt;p.y+=dy/d*state.moveSpeed*55*dt;p.x=Math.max(12,Math.min(W-12,p.x));p.y=Math.max(80,Math.min(H-12,p.y))}else if(now-state.attackAt>720/state.attackSpeed){state.attackAt=now;playerAttack(t)}castSkills(t,now)}for(const e of [...state.enemies]){const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;if(d>35){e.x+=dx/d*18*dt;e.y+=dy/d*18*dt}else if(now-(e.lastHit||0)>1200){e.lastHit=now;state.hp-=Math.max(1,e.atk-state.def);state.effects.push({x:p.x,y:p.y-18,text:"受擊",life:.5,color:"#ff9999"});if(state.hp<=0){state.hp=state.maxHp*.55;state.enemies=[];feed("修士重傷，靈力護持後撤回秘境入口。")}}if(e.boss)$("bossHp").style.width=Math.max(0,e.hp/e.max*100)+"%"}state.effects=state.effects.filter(f=>{f.life-=dt;return f.life>0});state.enemies.forEach(e=>e.hit=Math.max(0,e.hit-dt));if(now-state.lastStat>5000){state.expPerHour=state.recentKills*realm().exp*720;state.recentKills=0;state.lastStat=now;updateHud()}}
+ for(const f of floatingTexts){f.life-=dt;f.node.y-=dt*24;f.node.alpha=Math.max(0,f.life/f.max)}for(let i=floatingTexts.length-1;i>=0;i--)if(floatingTexts[i].life<=0){app?.stage.removeChild(floatingTexts[i].node);floatingTexts[i].node.destroy();floatingTexts.splice(i,1)}if(!state.boss&&state.enemies.length<12&&now-state.spawnAt>realm().spawn*1000){spawnEnemy();state.spawnAt=now}if(t){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy)||1;p.angle=Math.atan2(dy,dx);p.moving=d>42;if(d>42){p.anim+=dt*11;p.x+=dx/d*state.moveSpeed*55*dt;p.y+=dy/d*state.moveSpeed*55*dt;p.x=Math.max(12,Math.min(W-12,p.x));p.y=Math.max(80,Math.min(H-12,p.y))}else if(now-state.attackAt>720/state.attackSpeed){state.attackAt=now;playerAttack(t)}castSkills(t,now)}for(const e of [...state.enemies]){const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;if(d>35){e.anim=(e.anim||0)+dt*8;e.facing=dx<0?-1:1;e.x+=dx/d*18*dt;e.y+=dy/d*18*dt}else if(now-(e.lastHit||0)>1200){e.lastHit=now;state.hp-=Math.max(1,e.atk-state.def);state.effects.push({x:p.x,y:p.y-18,text:"受擊",life:.5,color:"#ff9999"});if(state.hp<=0){state.hp=state.maxHp*.55;state.enemies=[];feed("修士重傷，靈力護持後撤回秘境入口。")}}if(e.boss)$("bossHp").style.width=Math.max(0,e.hp/e.max*100)+"%"}state.effects=state.effects.filter(f=>{f.life-=dt;return f.life>0});state.enemies.forEach(e=>e.hit=Math.max(0,e.hit-dt));if(now-state.lastStat>5000){state.expPerHour=state.recentKills*realm().exp*720;state.recentKills=0;state.lastStat=now;updateHud()}}
 function draw(dt=0){
  if(!app||!worldLayer)return;
  const g=worldLayer,gl=glowLayer,fx=fxLayer;g.clear();gl.clear();fx.clear();
@@ -127,18 +127,22 @@ function draw(dt=0){
  for(let i=0;i<46;i++){const x=(i*137+31)%Math.max(1,W),y=(i*173+63)%Math.max(1,H);g.ellipse(x,y,20+(i%5)*7,9+(i%3)*5).fill({color:i%2?"#263a31":"#304237",alpha:.28});if(i%3===0){g.circle(x+13,y-5,2).fill({color:"#788d67",alpha:.42});g.moveTo(x-8,y+3).lineTo(x+3,y+1).stroke({color:"#52654d",alpha:.3,width:2})}}
  for(let x=0;x<W;x+=76)g.moveTo(x,0).lineTo(x,H).stroke({color:"#52614b",alpha:.10,width:1});
  for(let y=0;y<H;y+=76)g.moveTo(0,y).lineTo(W,y).stroke({color:"#52614b",alpha:.10,width:1});
+ // Broken flagstones and ancient roots create a readable forest path.
+ for(let i=0;i<9;i++){const x=(i*91+27)%Math.max(1,W),y=(i*157+130)%Math.max(1,H);g.roundRect(x,y,24+(i%3)*9,10+(i%2)*5,3).fill({color:"#596052",alpha:.24});g.moveTo(x+4,y+3).lineTo(x+13,y+6).stroke({color:"#9b987d",alpha:.18,width:1})}
+ for(let i=0;i<7;i++){const x=(i*149+68)%Math.max(1,W),y=(i*211+210)%Math.max(1,H);g.moveTo(x-24,y+16).bezierCurveTo(x-6,y-2,x+8,y+7,x+25,y-18).stroke({color:"#536247",alpha:.45,width:3});g.moveTo(x-15,y+10).lineTo(x-27,y-1).stroke({color:"#536247",alpha:.34,width:2})}
+ for(let i=0;i<5;i++){const x=(i*181+85)%Math.max(1,W),y=(i*233+90)%Math.max(1,H);g.ellipse(x,y,14,6).fill({color:"#17231c",alpha:.7});g.circle(x,y-4,4).fill({color:i%2?"#8d9c72":"#a0a27a",alpha:.75});g.circle(x,y-5,1.3).fill({color:"#d5d2a0",alpha:.7})}
  for(let i=0;i<24;i++){const x=(i*113+47)%Math.max(1,W),y=(i*191+91)%Math.max(1,H);g.circle(x,y,1.5).fill({color:"#b5d59b",alpha:.38})}
  const alive=new Set();
  for(const e of state.enemies){
    alive.add(e);
    let node=spriteNodes.get(e);
    if(!node){node=new PIXI.Sprite(artTextures[e.type]||artTextures.wolf);node.anchor.set(.5,.65);node.width=e.boss?72:48;node.height=e.boss?78:54;spriteLayer.addChild(node);spriteNodes.set(e,node)}
-   node.x=e.x;node.y=e.y;node.alpha=e.hit>0?1:.96;node.tint=e.hit>0?0xffffff:0xffffff;
+   node.x=e.x;node.y=e.y+Math.sin((e.anim||0))*2.2;node.scale.x=(e.boss?1.25:1)*(e.facing===-1?-1:1);node.alpha=e.hit>0?1:.96;node.tint=e.hit>0?0xffffff:0xffffff;
    if(e.hp<e.max){g.roundRect(e.x-17,e.y-29,34,4,2).fill("#321e25");g.roundRect(e.x-17,e.y-29,34*Math.max(0,e.hp/e.max),4,2).fill("#d76b69")}
    if(e.boss)gl.circle(e.x,e.y-8,36).fill({color:"#df6674",alpha:.22});
  }
  for(const [e,node] of spriteNodes){if(!alive.has(e)){spriteLayer.removeChild(node);node.destroy();spriteNodes.delete(e)}}
- const p=state.player;playerSprite.x=p.x;playerSprite.y=p.y;playerSprite.rotation=p.angle*.10;
+ const p=state.player;playerSprite.x=p.x;playerSprite.y=p.y+Math.sin(p.anim)* (p.moving?3.2:1.1);playerSprite.scale.y=1+Math.sin(p.anim*2)*.025;playerSprite.scale.x=1;playerSprite.rotation=p.angle*.035;
  gl.ellipse(p.x,p.y+5,25,12).fill({color:"#e6c77d",alpha:.30});
  for(const q of state.projectiles){gl.circle(q.x,q.y,q.size*3).fill({color:q.color,alpha:.32});fx.circle(q.x,q.y,q.size).fill(q.color);fx.circle(q.x,q.y,q.size*.45).fill("#ffffff")}
  particles.draw(fx);
