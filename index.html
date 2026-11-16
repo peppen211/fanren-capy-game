@@ -15,6 +15,31 @@ nav{height:66px;flex:none;display:grid;grid-template-columns:repeat(3,1fr);paddi
 #panel{position:absolute;inset:0;background:#0c121bf2;z-index:4;display:none;overflow:auto;padding:16px 14px 24px}#panel.open{display:block}.panelhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.panelhead h2{font-size:20px;margin:0}.close{background:#263548;border:1px solid #41536a;border-radius:9px;padding:7px 12px;font-size:12px}
 .card{background:linear-gradient(145deg,#192534,#121b27);border:1px solid var(--line);border-radius:13px;padding:12px;margin-bottom:10px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.muted{color:var(--muted)}.tag{font-size:10px;border:1px solid #46566b;border-radius:20px;padding:3px 7px;color:#b9c7d6}.btn{background:#344b60;border:1px solid #56708a;padding:8px 11px;border-radius:9px;font-size:12px}.btn:disabled{opacity:.4}.item{background:#1a2736;border:1px solid #35475c;border-radius:10px;padding:10px;margin:6px 0}.item h3{font-size:13px;margin:0 0 5px}.item p{font-size:11px;color:#aebccc;margin:0 0 8px;line-height:1.5}.common{color:#d5dce4}.rare{color:#78b8ee}.epic{color:#c19aff}.legend{color:#f0c66e}.stat{font-size:12px;color:#b8c5d3;line-height:1.8}.note{font-size:10px;color:#78899d;text-align:center;padding:12px}
 @media(min-width:700px){#app{max-width:760px;margin:auto;border-left:1px solid #273548;border-right:1px solid #273548}header{height:60px}nav{height:72px}}
+
+/* Art overhaul: refined xianxia visual language and mobile HUD hierarchy. */
+header{background:linear-gradient(180deg,#172333 0%,#101925 100%);border-bottom:1px solid #7e6940;box-shadow:0 5px 18px #02070b80}
+header .brand{font-size:16px;letter-spacing:.08em;text-shadow:0 1px 8px #d8b86a33}
+header .realm{background:linear-gradient(135deg,#352d20,#171d24);border-color:#947644;box-shadow:inset 0 0 0 1px #e7c77b22,0 2px 10px #0006;font-weight:700}
+.hud{top:12px;left:12px;right:12px;gap:8px}
+.hudbox{min-width:124px;padding:10px 12px;background:linear-gradient(145deg,#111d29ee,#09131deF);border:1px solid #9a8356;border-radius:13px;box-shadow:0 8px 24px #0008,inset 0 1px #ffffff12}
+.hudbox:after{content:"";display:block;height:1px;margin-top:7px;background:linear-gradient(90deg,transparent,#d4b97866,transparent)}
+.small{font-size:11px;letter-spacing:.035em;color:#aebdca}
+.value{font-size:16px;letter-spacing:.02em;text-shadow:0 1px 8px #d8c18b33}
+.bar{height:7px;background:#263543;border:1px solid #52604f;border-radius:20px;margin-top:7px}
+.bar>i{background:linear-gradient(90deg,#397d68,#76cba0,#d4df9c);box-shadow:0 0 9px #79d6a455}
+#feed,#pausehint{background:linear-gradient(135deg,#101c27eF,#0a121beF);border:1px solid #5f654f88;box-shadow:0 5px 16px #0006;border-radius:11px;padding:9px 11px;font-size:11px}
+#feed{color:#e4d6ad}
+#pausehint{color:#c6d4dd}
+nav{background:linear-gradient(180deg,#172333,#0e1722);border-top:1px solid #806d49;box-shadow:0 -5px 22px #0007}
+nav button{font-size:11px;letter-spacing:.08em}
+nav button b{font-size:22px;text-shadow:0 2px 10px #d7bd7a22}
+nav button.active{color:#f0d18d;text-shadow:0 0 12px #d8b86a66}
+#panel{background:linear-gradient(160deg,#111d2aF7,#090f18F8);backdrop-filter:blur(14px)}
+.panelhead h2{color:#f0d18d;letter-spacing:.08em}
+.card{background:linear-gradient(145deg,#1e3040,#111d2a);border-color:#7a6948;box-shadow:0 7px 20px #0004,inset 0 1px #ffffff0d}
+.item{background:linear-gradient(145deg,#1c2b39,#111b27);border-color:#52634f}
+.btn,.close{background:linear-gradient(135deg,#53674f,#263c3a);border-color:#a08b5a;color:#f4e6bf}
+
 </style>
 </head>
 <body><div id="app">
@@ -85,14 +110,9 @@ async function setupRenderer(){
  worldLayer=new PIXI.Graphics();spriteLayer=new PIXI.Container();glowLayer=new PIXI.Graphics();fxLayer=new PIXI.Graphics();
  app.stage.addChild(worldLayer,spriteLayer,glowLayer,fxLayer);
  try{glowLayer.filters=[new PIXI.BlurFilter({strength:4,quality:2})];glowLayer.blendMode="add"}catch(e){console.warn("Glow filter fallback",e)}
- const art={
- player:`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="112" viewBox="0 0 96 112"><defs><linearGradient id="r" x2="1" y2="1"><stop stop-color="#d9e8ee"/><stop offset=".48" stop-color="#668ca8"/><stop offset="1" stop-color="#263b5d"/></linearGradient><linearGradient id="g"><stop stop-color="#fff0b2"/><stop offset="1" stop-color="#b8893d"/></linearGradient></defs><ellipse cx="48" cy="102" rx="26" ry="6" fill="#08121b" opacity=".55"/><path d="M29 43 15 91 42 82 49 105 57 82 82 92 67 43Z" fill="url(#r)" stroke="#d3c18a" stroke-width="2"/><path d="m31 48 17 18 18-18 8 38-26-10-24 10Z" fill="#1c3049" stroke="#a8c5d0" stroke-width="2"/><path d="M34 42 48 14 64 42 57 57 48 52 39 58Z" fill="#d9e5e6" stroke="#c7a969" stroke-width="2"/><path d="m34 25 14-17 17 17-7 10H40Z" fill="#243d59" stroke="#e7ca83" stroke-width="3"/><path d="M43 27h10l-5 9Z" fill="#73d4e4"/><path d="M68 49 88 21" stroke="url(#g)" stroke-width="4" stroke-linecap="round"/><path d="m83 18 8-9 1 14" fill="#f7dc91" stroke="#fff0b8" stroke-width="2"/><path d="m26 52-8 28 13-6" fill="#9ebdc9"/><path d="M39 65 48 77 58 65" fill="none" stroke="#e8d39c" stroke-width="2"/></svg>`,
- wolf:`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="88" viewBox="0 0 96 88"><defs><linearGradient id="m" x2="1" y2="1"><stop stop-color="#a6b98a"/><stop offset="1" stop-color="#405d48"/></linearGradient></defs><ellipse cx="48" cy="79" rx="32" ry="5" fill="#07110d" opacity=".55"/><path d="M18 54 8 34 25 39 31 17 44 31 59 22 65 39 84 35 76 58 59 69 29 68Z" fill="url(#m)" stroke="#233c2d" stroke-width="3"/><path d="m27 42-8-22 17 14M58 36 72 16 75 41" fill="#758f69" stroke="#d0d2a0" stroke-width="3"/><path d="m35 47 12-7 17 6-9 17-18-2Z" fill="#273e30"/><path d="m39 49 5-2m13 0 5 2" stroke="#f3d58a" stroke-width="4" stroke-linecap="round"/><path d="m45 59 7 4 6-5" fill="#d9d0b2"/><path d="m29 64-5 15m31-12 4 12m15-22 8 12" stroke="#d0c39b" stroke-width="5" stroke-linecap="round"/></svg>`,
- golem:`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"><defs><linearGradient id="s" x2="1" y2="1"><stop stop-color="#b1a98b"/><stop offset="1" stop-color="#4c5148"/></linearGradient></defs><ellipse cx="48" cy="87" rx="34" ry="6" fill="#07110d" opacity=".6"/><path d="m17 42 12-22 17 7 12-13 19 20 4 23-12 24-20 8-23-9-13-20Z" fill="url(#s)" stroke="#343e36" stroke-width="3"/><path d="m27 40 14-13 9 12-7 13-18 1Zm29-8 13-7 9 17-12 8-10-7Z" fill="#777e70" stroke="#c0b99b" stroke-width="2"/><path d="m31 57 13-8 8 9-6 17-18-5Zm28 1 14-8 4 17-15 10-9-8Z" fill="#626b5d"/><path d="m38 43 7 3m13-4 7-2" stroke="#ffc36a" stroke-width="4" stroke-linecap="round"/><path d="m47 53 6 5 7-5" fill="none" stroke="#e7a35b" stroke-width="3"/><path d="m17 47-8 14 16 4m54-17 11 13-15 7" fill="#858a77" stroke="#414b40" stroke-width="3"/></svg>`,
- wraith:`<svg xmlns="http://www.w3.org/2000/svg" width="88" height="100" viewBox="0 0 88 100"><defs><linearGradient id="w" x2="0" y2="1"><stop stop-color="#b7e8e9" stop-opacity=".95"/><stop offset="1" stop-color="#397c91" stop-opacity=".35"/></linearGradient></defs><ellipse cx="44" cy="91" rx="24" ry="5" fill="#07121a" opacity=".45"/><path d="M44 9 60 18 68 39 62 63 77 82 60 77 47 91 34 78 13 85 27 62 20 39 28 18Z" fill="url(#w)" stroke="#9bd8df" stroke-width="2"/><path d="M28 24 44 5 60 24 54 42 34 42Z" fill="#183d55" stroke="#b6dce1" stroke-width="2"/><path d="m35 31 5 2m9 0 5-2" stroke="#b9f8ff" stroke-width="4" stroke-linecap="round"/><path d="m37 44 7 6 8-6" fill="none" stroke="#c7f3ed" stroke-width="2"/><path d="M20 51 9 65m52-13 15 12" stroke="#8bd4df" stroke-width="5" stroke-linecap="round"/><path d="M44 14v-9m-8 12-7-7m23 7 8-7" stroke="#d6eff0" stroke-width="2"/></svg>`
- };
- for(const [key,svg] of Object.entries(art)){const uri="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);artTextures[key]=await PIXI.Assets.load(uri)}
- playerSprite=new PIXI.Sprite(artTextures.player);playerSprite.anchor.set(.5,.62);playerSprite.width=30;playerSprite.height=36;playerBaseScaleX=playerSprite.scale.x;playerBaseScaleY=playerSprite.scale.y;spriteLayer.addChild(playerSprite);
+ const art={player:"assets/player-cultivator.svg",wolf:"assets/wolf-spirit.svg",golem:"assets/stone-golem.svg",wraith:"assets/wraith-spirit.svg"};
+ for(const [key,path] of Object.entries(art)){artTextures[key]=await PIXI.Assets.load(path)}
+ playerSprite=new PIXI.Sprite(artTextures.player);playerSprite.anchor.set(.5,.62);playerSprite.width=42;playerSprite.height=48;playerBaseScaleX=playerSprite.scale.x;playerBaseScaleY=playerSprite.scale.y;spriteLayer.addChild(playerSprite);
  try{glowLayer.filters=[new PIXI.BlurFilter({strength:4,quality:2})];glowLayer.blendMode="add"}catch(e){console.warn("Glow filter fallback",e)}
  resize();return true
 }
@@ -122,7 +142,20 @@ function step(dt,now){const p=state.player,t=nearest();
 function draw(dt=0){
  if(!app||!worldLayer)return;
  const g=worldLayer,gl=glowLayer,fx=fxLayer;g.clear();gl.clear();fx.clear();
- g.rect(0,0,W,H).fill("#17231f");
+ g.rect(0,0,W,H).fill("#17251f");
+ // Organic forest floor: layered moss, leaf litter, roots, stones and soft pools of light.
+ for(let i=0;i<34;i++){const x=(i*173+41)%Math.max(1,W),y=(i*227+29)%Math.max(1,H),rx=24+(i%6)*10,ry=12+(i%4)*7;g.ellipse(x,y,rx,ry).fill({color:i%3===0?"#344a35":i%3===1?"#253d30":"#1d342a",alpha:.26+(i%3)*.035});}
+ // Dense canopy shadows frame the playable clearing instead of a visible grid.
+ for(let i=0;i<22;i++){const side=i%2,yy=(i*83+25)%Math.max(1,H),xx=side?W-8:8;g.ellipse(xx,yy,34+(i%4)*8,45+(i%3)*12).fill({color:"#0a1714",alpha:.34});g.ellipse(xx+(side?-13:13),yy-10,22,31).fill({color:"#294332",alpha:.48});}
+ // Broken old flagstones, mossy edges and scattered pebbles.
+ for(let i=0;i<13;i++){const x=(i*97+23)%Math.max(1,W),y=(i*151+117)%Math.max(1,H),rw=17+(i%4)*9,rh=7+(i%3)*5;g.roundRect(x,y,rw,rh,4).fill({color:"#69705b",alpha:.23});g.roundRect(x+2,y+1,rw*.55,rh*.22,2).fill({color:"#b0a985",alpha:.18});g.circle(x+rw+5,y+rh+3,1.8+i%2).fill({color:"#8c9a70",alpha:.38});}
+ // Exposed roots and fern-like ground growth.
+ for(let i=0;i<9;i++){const x=(i*139+56)%Math.max(1,W),y=(i*193+175)%Math.max(1,H);g.moveTo(x-27,y+17).bezierCurveTo(x-10,y-3,x+8,y+8,x+29,y-22).stroke({color:"#59664a",alpha:.42,width:3.5});g.moveTo(x-13,y+8).lineTo(x-28,y-5).stroke({color:"#65734e",alpha:.36,width:2});g.moveTo(x+7,y+3).lineTo(x+19,y+15).stroke({color:"#65734e",alpha:.32,width:2});}
+ for(let i=0;i<46;i++){const x=(i*71+19)%Math.max(1,W),y=(i*127+37)%Math.max(1,H);g.moveTo(x,y+4).quadraticCurveTo(x-3,y-3,x-7,y-8).stroke({color:"#779064",alpha:.36,width:1.6});g.moveTo(x,y+4).quadraticCurveTo(x+2,y-5,x+8,y-9).stroke({color:"#91a575",alpha:.32,width:1.6});}
+ // Fireflies and tiny spirit flowers add depth without cluttering the combat lane.
+ for(let i=0;i<15;i++){const x=(i*181+83)%Math.max(1,W),y=(i*239+61)%Math.max(1,H);g.circle(x,y,5).fill({color:"#b6d98b",alpha:.055});g.circle(x,y,1.7).fill({color:"#c9e8a0",alpha:.56});g.circle(x-1,y-1,0.7).fill({color:"#f0f3c0",alpha:.75});}
+ // Subtle vignette at the edges.
+ g.rect(0,0,W,18).fill({color:"#07110f",alpha:.20});g.rect(0,H-20,W,20).fill({color:"#07110f",alpha:.24});
  // Layered forest-floor texture, scattered stones and ancient moss.
  for(let i=0;i<46;i++){const x=(i*137+31)%Math.max(1,W),y=(i*173+63)%Math.max(1,H);g.ellipse(x,y,20+(i%5)*7,9+(i%3)*5).fill({color:i%2?"#263a31":"#304237",alpha:.28});if(i%3===0){g.circle(x+13,y-5,2).fill({color:"#788d67",alpha:.42});g.moveTo(x-8,y+3).lineTo(x+3,y+1).stroke({color:"#52654d",alpha:.3,width:2})}}
  for(let x=0;x<W;x+=76)g.moveTo(x,0).lineTo(x,H).stroke({color:"#52614b",alpha:.10,width:1});
@@ -136,7 +169,7 @@ function draw(dt=0){
  for(const e of state.enemies){
    alive.add(e);
    let node=spriteNodes.get(e);
-   if(!node){node=new PIXI.Sprite(artTextures[e.type]||artTextures.wolf);node.anchor.set(.5,.65);node.width=e.boss?40:26;node.height=e.boss?43:29;node._baseScaleX=node.scale.x;node._baseScaleY=node.scale.y;spriteLayer.addChild(node);spriteNodes.set(e,node)}
+   if(!node){node=new PIXI.Sprite(artTextures[e.type]||artTextures.wolf);node.anchor.set(.5,.72);node.width=e.boss?58:36;node.height=e.boss?58:38;node._baseScaleX=node.scale.x;node._baseScaleY=node.scale.y;spriteLayer.addChild(node);spriteNodes.set(e,node)}
    node.x=e.x;node.y=e.y+Math.sin((e.anim||0))*2.2;node.scale.set(node._baseScaleX*(e.facing===-1?-1:1),node._baseScaleY*(1+Math.sin((e.anim||0)*2)*.012));node.alpha=e.hit>0?1:.96;node.tint=e.hit>0?0xffffff:0xffffff;node.x+=e.hit>0?Math.sin(performance.now()*.09)*1.5:0;
    if(e.hp<e.max){g.roundRect(e.x-12,e.y-23,24,3,1.5).fill("#321e25");g.roundRect(e.x-12,e.y-23,24*Math.max(0,e.hp/e.max),3,1.5).fill("#d76b69")}
    if(e.boss)gl.circle(e.x,e.y-5,25).fill({color:"#df6674",alpha:.20});
