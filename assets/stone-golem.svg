@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="112" height="112" viewBox="0 0 112 112">
+<defs><linearGradient id="stone" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d0c5a3"/><stop offset=".48" stop-color="#8b8b78"/><stop offset="1" stop-color="#424e48"/></linearGradient><linearGradient id="crack"><stop stop-color="#ffd68a"/><stop offset="1" stop-color="#b56b38"/></linearGradient></defs>
+<ellipse cx="56" cy="101" rx="39" ry="7" fill="#060d0c" opacity=".65"/>
+<path d="m20 43 11-27 20 9 13-17 21 25 13 24-10 30-25 18-31-8-19-24Z" fill="url(#stone)" stroke="#353f38" stroke-width="3"/>
+<path d="m26 43 18-18 12 17-10 18-20-3Zm36-9 17-13 17 24-16 14-17-8Z" fill="#a5a28a" stroke="#d6c9a7" stroke-width="2"/>
+<path d="m30 65 17-10 10 14-8 21-22-10Zm37 3 18-11 7 21-18 13-12-10Z" fill="#646f61"/>
+<path d="m39 48 8 3m18-4 9-3" stroke="url(#crack)" stroke-width="5" stroke-linecap="round"/>
+<path d="m48 61 8 7 10-8" fill="none" stroke="#e6b36d" stroke-width="3"/>
+<path d="m20 49-12 19 19 7m67-31 14 18-17 10" fill="#92927d" stroke="#414a40" stroke-width="3"/>
+<path d="m51 27 6 11-7 9m24 18-8 12 10 9" fill="none" stroke="#d9b77e" stroke-width="2" opacity=".8"/>
+<circle cx="56" cy="15" r="4" fill="#f0c77b"/>
+</svg>
