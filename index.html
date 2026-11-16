@@ -88,21 +88,147 @@ function renderPools(){$('pools').innerHTML=[['weapon','古修洞府寶箱','飛
 function pull(cat,num){const cost=num===10?900:100;if(save.gem<cost)return modal('極品靈石不足','目前靈石不足，先去歷練或領取聚靈陣收益。');save.gem-=cost;const got=[];for(let i=0;i<num;i++){const t=templates[cat][Math.floor(Math.random()*3)],r=Math.random(),tier=r<.08?2:r<.35?1:0;save.items.push({id:save.next++,cat,key:t[0],tier});got.push(quality[tier]+'·'+t[1])}persist();refresh();modal('秘境尋寶收穫',got.join('<br>'))}
 const skillPool=[['combo','青元劍芒','連擊率提升 20%'],['sword','劍氣縱橫','每次普攻追加飛劍傷害'],['thunder','辟邪神雷訣','普攻有機率觸發雷擊'],['heal','大衍吸靈術','普攻回復部分生命'],['shield','玄鐵護體功','戰鬥開始獲得護盾'],['crit','劍心通明','暴擊率提升 20%'],['rage','天魔解體大法','大招靈力累積加快'],['thorn','託天魔甲','受擊時反彈傷害']];
 function startRun(){modalChoices('選擇歷練強度',[['普通歷練','敵人基礎強度 ×1.5，適合一般養成',()=>beginRun('normal')],['困難歷練','敵人基礎強度 ×2.2，戰敗風險明顯提高',()=>beginRun('hard')],['極限歷練','敵人基礎強度 ×3.0，追求高風險挑戰',()=>beginRun('extreme')]])}
-function beginRun(mode){const s=stats(),w=meta(save.items.find(x=>x.id===save.eq.weapon)),p=meta(save.items.find(x=>x.id===save.eq.pet)),a=meta(save.items.find(x=>x.id===save.eq.artifact));const modes={normal:{label:'普通',hp:1.5,atk:1.5},hard:{label:'困難',hp:2.2,atk:2.2},extreme:{label:'極限',hp:3,atk:3}};run={day:1,hp:s.hp,max:s.hp,atk:s.atk,def:s.def,crit:s.crit,stone:0,exp:0,next:35,skills:[],w:w.key,p:p.key,a:a.key,enemy:null,turn:0,shield:0,paused:false,build:w.build,chapter:save.chapter,difficulty:modes[mode],kills:0,loot:[],events:0};speed=1;clearTimeout(timer);$('pauseBtn').textContent='暫停';$('runChapter').textContent='第'+save.chapter+'章：'+titles[save.chapter-1]+' · '+run.difficulty.label;$('build').textContent=w.build;$('enemySprite').textContent='🐍';$('battleLog').textContent='踏入歷練之地，開始60天自動修行！';showView('battle');tick()}
+function beginRun(mode){
+ const s=stats(),w=meta(save.items.find(x=>x.id===save.eq.weapon)),p=meta(save.items.find(x=>x.id===save.eq.pet)),a=meta(save.items.find(x=>x.id===save.eq.artifact));
+ const modes={normal:{label:'普通',hp:1.5,atk:1.5},hard:{label:'困難',hp:2.2,atk:2.2},extreme:{label:'極限',hp:3,atk:3}};
+ run={day:1,hp:s.hp,max:s.hp,atk:s.atk,def:s.def,crit:s.crit,stone:0,exp:0,next:35,skills:[],w:w.key,p:p.key,a:a.key,enemy:null,turn:0,shield:0,paused:false,build:w.build,chapter:save.chapter,difficulty:modes[mode],kills:0,loot:[],events:0,rage:0,turnBusy:false,phaseQueue:null,phaseIndex:0};
+ speed=1;clearTimeout(timer);$('pauseBtn').textContent='暫停';
+ $('runChapter').textContent='第'+save.chapter+'章：'+titles[save.chapter-1]+' · '+run.difficulty.label;
+ $('build').textContent=w.build;$('enemySprite').textContent='🐍';$('battleLog').textContent='踏入歷練之地，開始60天自動修行！';
+ showView('battle');tick();
+}
 function log(t){$('battleLog').textContent=t}
-function tick(){if(!run||run.paused)return;if(run.day>60){finish(true);return}if(!run.enemy){if([15,30,45].includes(run.day))spawn('菁英妖王',1.8,false);else if(run.day===60)spawn('章節首領',2.6,true);else{const r=Math.random();if(r<.5)spawn('山林毒蟒',1,false);else if(r<.78){run.events++;if(Math.random()<.5){run.stone+=35;run.exp+=30;run.loot.push('奇遇：靈石 +35、修為 +30')}else{const heal=Math.floor(run.max*.3);run.hp=Math.min(run.max,run.hp+heal);run.atk=Math.floor(run.atk*1.04);run.loot.push('奇遇：回復氣血、攻擊永久 +4%')}run.day++;log('第'+(run.day-1)+'天：遭遇修仙奇遇，收穫已記錄。')}else{const heal=Math.floor(run.max*.15);run.hp=Math.min(run.max,run.hp+heal);run.stone+=12;run.loot.push('打坐調息：靈石 +12、恢復氣血');log('第'+run.day+'天：打坐調息，收穫已記錄。');run.day++}}}else fight();updateBattle();if(run&&!run.paused)timer=setTimeout(tick,run.enemy?500/speed:250/speed)}
+function tick(){
+ if(!run||run.paused)return;
+ if(run.day>60){finish(true);return}
+ if(run.enemy){fight();return}
+ if([15,30,45].includes(run.day)){spawn('菁英妖王',1.8,false)}
+ else if(run.day===60){spawn('章節首領',2.6,true)}
+ else{
+  const r=Math.random();
+  if(r<.5){spawn('山林毒蟒',1,false)}
+  else if(r<.78){
+   run.events++;
+   if(Math.random()<.5){run.stone+=35;run.exp+=30;run.loot.push('奇遇：靈石 +35、修為 +30')}
+   else{const heal=Math.floor(run.max*.3);run.hp=Math.min(run.max,run.hp+heal);run.atk=Math.floor(run.atk*1.04);run.loot.push('奇遇：回復氣血、攻擊永久 +4%')}
+   log('第'+run.day+'天：遭遇修仙奇遇，收穫已記錄。');run.day++;
+  }else{
+   const heal=Math.floor(run.max*.15);run.hp=Math.min(run.max,run.hp+heal);run.stone+=12;run.loot.push('打坐調息：靈石 +12、恢復氣血');log('第'+run.day+'天：打坐調息，收穫已記錄。');run.day++;
+  }
+ }
+ updateBattle();
+ if(run&&!run.paused&&!run.enemy)timer=setTimeout(tick,350/speed);
+ else if(run&&!run.paused&&run.enemy)timer=setTimeout(tick,350/speed);
+}
 function spawn(name,mult,boss){const c=run.chapter,scale=1+(c-1)*0.28,mode=run.difficulty,hp=Math.floor((420+run.day*35)*scale*mult*mode.hp),atk=Math.floor((26+run.day*.95)*(1+(c-1)*0.28)*mult*mode.atk);run.enemy={name,hp,max:hp,atk,def:Math.floor((5+run.day*.45)*scale*mult*mode.hp),boss,stun:false};run.shield=run.skills.some(x=>x[0]==='shield')?run.max*.4:0;$('enemyName').textContent=name;$('enemyRole').textContent=boss?'章節首領':(name.includes('菁英')?'精英妖獸':'妖獸');$('enemySprite').textContent=boss?'🐉':(name.includes('菁英')?'🐲':'🐍');$('turnLabel').textContent=boss?'首領戰':'遭遇戰';log('第'+run.day+'天：'+name+'現身！敵方戰力已依歷練強度調整。');updateBattle()}
 function fx(type,text){const arena=$('arena');const el=document.createElement('div');el.className=type==='slash'?'slash-fx':type==='spell'?'spell-fx':'damage-float';el.textContent=text;arena.appendChild(el);setTimeout(()=>el.remove(),850)}
 function animateHit(attacker,target,kind='slash'){const a=$(attacker),t=$(target);a.classList.add(attacker==='playerFighter'?'attack-player':'attack-enemy');t.classList.add('hit');fx(kind,kind==='slash'?'⚔':kind==='spell'?'⚡':'');setTimeout(()=>{a.classList.remove('attack-player','attack-enemy');t.classList.remove('hit')},260);if(kind==='spell')$('arena').classList.add('shaking');setTimeout(()=>$('arena').classList.remove('shaking'),300)}
 function damageText(text){const arena=$('arena'),el=document.createElement('div');el.className='damage-float';el.textContent=text;arena.appendChild(el);setTimeout(()=>el.remove(),850)}
-function fight(){const e=run.enemy;if(!e)return;run.turn++;$('turnLabel').textContent='第 '+run.turn+' 回合';animateHit('playerFighter','enemyFighter');let hits=Math.random()<((run.w==='sword'?.3:.1)+(has('combo')?.2:0))?2:1,total=0;for(let i=0;i<hits;i++){let dmg=Math.max(1,run.atk-e.def),crit=Math.random()*100<run.crit+(has('crit')?20:0);if(crit)dmg=Math.floor(dmg*1.8);e.hp-=dmg;total+=dmg;if(run.w==='sword'||has('sword')){const extra=Math.floor(run.atk*.65);e.hp-=extra;total+=extra}if((run.w==='hammer'||has('thunder'))&&Math.random()<.35){const thunder=Math.floor(run.atk*1.3);e.hp-=thunder;total+=thunder}if(run.w==='ruler')run.shield+=Math.floor(run.def*1.2);if(has('heal'))run.hp=Math.min(run.max,run.hp+Math.floor(dmg*.2));run.rage=(run.rage||0)+(has('rage')?50:28)}if(run.p==='beetle'){const bite=Math.floor(run.atk*.45);e.hp-=bite;total+=bite}else if(run.p==='ghost'&&run.turn%3===0)e.stun=true;if(run.rage>=100){run.rage=0;if(run.a==='bottle'){run.hp=Math.min(run.max,run.hp+run.max*.35);run.atk=Math.floor(run.atk*1.08)}else{const ult=Math.floor(run.atk*(run.a==='wings'?1.8:2.4));e.hp-=ult;total+=ult}}if(total>0)damageText('-'+total);if(e.hp<=0){winFight();return}if(e.stun){e.stun=false;updateBattle();return}animateHit('enemyFighter','playerFighter');const hurt=Math.max(1,e.atk-run.def),abs=Math.min(run.shield,hurt);run.shield-=abs;run.hp-=hurt-abs;if(run.w==='ruler'||has('thorn')){const reflect=Math.floor(run.atk*.9+run.def);e.hp-=reflect}log(e.name+'反撲韓立，造成 '+Math.max(0,hurt-abs)+' 點傷害。');if(run.hp<=0){finish(false);return}if(e.hp<=0){winFight();return}updateBattle()}
+function fight(){
+ const e=run&&run.enemy;if(!e||run.turnBusy)return;
+ run.turnBusy=true;run.turn++;run.phaseIndex=0;
+ run.phaseQueue=[
+  {label:'靈獸出擊',run:combatPetPhase},
+  {label:'被動功法',run:combatPassivePhase},
+  {label:'修士出招',run:combatPlayerPhase},
+  {label:'法寶與怒氣',run:combatRagePhase},
+  {label:'妖獸反擊',run:combatEnemyPhase},
+  {label:'狀態結算',run:combatEndPhase}
+ ];
+ processCombatPhase();
+}
+function processCombatPhase(){
+ if(!run||run.paused||!run.enemy)return;
+ if(run.enemy.hp<=0){run.phaseQueue=null;run.turnBusy=false;winFight();return}
+ if(run.hp<=0){run.phaseQueue=null;run.turnBusy=false;finish(false);return}
+ if(!run.phaseQueue||run.phaseIndex>=run.phaseQueue.length){
+  run.phaseQueue=null;run.phaseIndex=0;run.turnBusy=false;updateBattle();
+  timer=setTimeout(tick,350/speed);return;
+ }
+ const phase=run.phaseQueue[run.phaseIndex++];
+ $('turnLabel').textContent='第 '+run.turn+' 回合 · '+phase.label;
+ phase.run();
+ updateBattle();
+ if(run&&!run.paused&&run.enemy)timer=setTimeout(processCombatPhase,420/speed);
+}
+function combatPetPhase(){
+ const e=run.enemy;
+ if(run.p==='beetle'){const bite=Math.max(1,Math.floor(run.atk*.45));e.hp-=bite;damageText('噬金蟲 -'+bite);log('噬金蟲撲上去啃咬，造成 '+bite+' 點傷害。')}
+ else if(run.p==='ghost'&&run.turn%3===0){e.stun=true;log('啼魂獸魂嘯！妖獸本回合無法反擊。')}
+ else if(run.p==='wolf'&&run.turn%2===0){run.petMark=true;log('銀月狼鎖定破綻，韓立本回合攻擊提高。')}
+}
+function combatPassivePhase(){
+ if(has('shield')&&run.turn===1){const gain=Math.floor(run.max*.4);run.shield+=gain;log('玄鐵護體功凝成護盾 '+gain+' 點。')}
+ if(has('heal')&&run.turn%2===0){const heal=Math.max(1,Math.floor(run.max*.04));run.hp=Math.min(run.max,run.hp+heal);log('大衍吸靈術回復 '+heal+' 點氣血。')}
+ if(run.petMark){run.atkBuff=Math.floor(run.atk*.25);run.petMark=false}
+}
+function combatPlayerPhase(){
+ const e=run.enemy;animateHit('playerFighter','enemyFighter');
+ let hits=1;
+ const comboChance=(run.w==='sword'?.3:.08)+(has('combo')?.2:0);
+ if(Math.random()<comboChance)hits=2;
+ let total=0;
+ for(let i=0;i<hits;i++){
+  let dmg=Math.max(1,run.atk+(run.atkBuff||0)-e.def);
+  const critical=Math.random()*100<run.crit+(has('crit')?20:0);
+  if(critical)dmg=Math.floor(dmg*1.8);
+  e.hp-=dmg;total+=dmg;
+  if(critical)damageText('暴擊 -'+dmg);
+  if(run.w==='sword'||has('sword')){const extra=Math.max(1,Math.floor(run.atk*.65));e.hp-=extra;total+=extra;fx('slash','✦')}
+  if((run.w==='hammer'||has('thunder'))&&Math.random()<.35){const thunder=Math.max(1,Math.floor(run.atk*1.3));e.hp-=thunder;total+=thunder;animateHit('playerFighter','enemyFighter','spell')}
+ }
+ run.atkBuff=0;
+ if(total>0)damageText('總傷害 -'+total);
+ if(run.w==='ruler')run.shield+=Math.floor(run.def*1.2);
+}
+function combatRagePhase(){
+ if(!run.enemy||run.enemy.hp<=0)return;
+ run.rage=(run.rage||0)+(has('rage')?50:28);
+ if(run.rage<100)return;
+ run.rage-=100;
+ if(run.a==='bottle'){
+  const heal=Math.floor(run.max*.35);run.hp=Math.min(run.max,run.hp+heal);run.atk=Math.floor(run.atk*1.08);
+  animateHit('playerFighter','playerFighter','spell');log('掌天瓶釋放靈液，回復 '+heal+' 點氣血並永久提升攻擊。');
+ }else{
+  const ult=Math.max(1,Math.floor(run.atk*(run.a==='wings'?1.8:2.4)));
+  run.enemy.hp-=ult;animateHit('playerFighter','enemyFighter','spell');damageText('法寶爆發 -'+ult);
+  log((run.a==='wings'?'風雷翅斬出疾風連擊！':'虛天鼎爆發乾藍冰焰！')+' 造成 '+ult+' 點傷害。');
+ }
+}
+function combatEnemyPhase(){
+ const e=run.enemy;if(!e||e.hp<=0)return;
+ if(e.stun){e.stun=false;log('妖獸受到魂嘯影響，錯失本回合攻擊。');return}
+ animateHit('enemyFighter','playerFighter');
+ const hurt=Math.max(1,e.atk-run.def),absorbed=Math.min(run.shield,hurt),actual=hurt-absorbed;
+ run.shield-=absorbed;run.hp-=actual;
+ if(run.w==='ruler'||has('thorn')){const reflect=Math.max(1,Math.floor(run.atk*.9+run.def));e.hp-=reflect;log('護體反震妖獸，反傷 '+reflect+' 點。')}
+ else log(e.name+'使出反撲，造成 '+actual+' 點傷害。');
+ if(actual>0)damageText('受到 -'+actual);
+}
+function combatEndPhase(){
+ if(run.enemy&&run.enemy.hp>0&&run.w==='ruler'&&run.turn%3===0){const heal=Math.floor(run.max*.03);run.hp=Math.min(run.max,run.hp+heal);log('玄鐵重尺護體回氣，恢復 '+heal+' 點。')}
+}
 function has(id){return run.skills.some(x=>x[0]===id)}
-function winFight(){const e=run.enemy;const reward=Math.floor((15+run.day*2)*(e.boss?3:1));run.stone+=reward;run.kills++;run.loot.push('擊敗 '+e.name+'：靈石 +'+reward);run.enemy=null;if(e.boss){finish(true);return}run.day++;gainExp(26)}
+function winFight(){
+ const e=run.enemy;if(!e)return;
+ const reward=Math.floor((15+run.day*2)*(e.boss?3:1));
+ run.stone+=reward;run.kills++;run.loot.push('擊敗 '+e.name+'：靈石 +'+reward);
+ run.enemy=null;run.phaseQueue=null;run.turnBusy=false;
+ if(e.boss){finish(true);return}
+ run.day++;gainExp(26);
+ if(run&&!run.paused)timer=setTimeout(tick,350/speed);
+}
 function nextDay(){run.day++;run.paused=false;updateBattle();tick()}
 function gainExp(n){run.exp+=n;if(run.exp>=run.next){run.exp-=run.next;run.next=Math.floor(run.next*1.28);run.paused=true;clearTimeout(timer);const picks=[...skillPool].sort(()=>Math.random()-.5).slice(0,3);modalChoices('修為精進！選擇一門功法',picks.map(skill=>[skill[1],skill[2],()=>{if(!run)return;run.skills.push(skill);$('skillCount').textContent=run.skills.length;run.loot.push('功法領悟：'+skill[1]);log('領悟功法：'+skill[1]+'，繼續歷練！');closeModal();run.paused=false;tick()}]))}}
 function updateBattle(){if(!run)return;$('day').textContent=run.day;$('runStone').textContent=run.stone;$('skillCount').textContent=run.skills.length;$('playerHpText').textContent=Math.max(0,Math.floor(run.hp))+' / '+run.max;$('playerHp').style.width=Math.max(0,run.hp/run.max*100)+'%';$('enemyHpText').textContent=run.enemy?Math.max(0,Math.floor(run.enemy.hp))+' / '+run.enemy.max:'等待遭遇';$('enemyHp').style.width=run.enemy?Math.max(0,run.enemy.hp/run.enemy.max*100)+'%':'0%';$('playerWeapon').textContent=run.build;$('playerSprite').textContent='🧑🏻‍🌾';if(!run.enemy){$('enemySprite').textContent='🐍';$('enemyRole').textContent='等待遭遇'}}
 function toggleSpeed(){speed=speed===1?2:1;$('speedBtn').textContent='倍速 '+speed+'x'}
-function pauseRun(){if(!run)return;run.paused=!run.paused;$('pauseBtn').textContent=run.paused?'繼續':'暫停';if(!run.paused)tick();else clearTimeout(timer)}
+function pauseRun(){
+ if(!run)return;
+ run.paused=!run.paused;$('pauseBtn').textContent=run.paused?'繼續':'暫停';
+ if(run.paused)clearTimeout(timer);
+ else if(run.phaseQueue&&run.turnBusy)processCombatPhase();
+ else tick();
+}
 function retreat(){if(!run)return;finish(false)}
 function finish(win){clearTimeout(timer);const r=run;if(!r)return;const bonus=win?150+r.chapter*20:30;save.stone+=r.stone;save.gem+=bonus;if(win&&r.chapter===save.maxChapter&&save.maxChapter<30){save.maxChapter++;save.chapter=save.maxChapter}run=null;persist();refresh();showView('home');const lines=r.loot.slice(-18).map(x=>'• '+x).join('<br>');modal(win?'60天歷練總結算':'歷練中止 · 戰敗結算','完成天數：'+Math.min(60,r.day)+' / 60<br>歷練強度：'+r.difficulty.label+'<br>擊敗妖獸：'+r.kills+' 隻<br>觸發奇遇：'+r.events+' 次<br>累積靈石：+'+r.stone+'<br>極品靈石：+'+bonus+'<br>最終氣血：'+Math.max(0,Math.floor(r.hp))+' / '+r.max+'<br><br><b>歷練收穫</b><br>'+(lines||'本次沒有額外收穫'))}
 function showSkills(){if(!run)return;modal('已領悟功法',run.skills.map(x=>x[1]+'：'+x[2]).join('<br>')||'尚未領悟局內功法')}
