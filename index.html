@@ -19,16 +19,17 @@ nav{height:66px;flex:none;display:grid;grid-template-columns:repeat(3,1fr);paddi
 </head>
 <body><div id="app">
 <header><div class="brand">凡人仙途 <span style="color:var(--gold)">· 無盡秘境</span></div><div class="realm" id="realmBadge">練氣期・一層</div></header>
-<main id="battle"><canvas id="world"></canvas>
+<main id="battle"><div id="world" aria-label="遊戲戰鬥畫面"></div>
 <div class="hud"><div class="hudbox"><div class="small">修士生命</div><div class="value" id="hpText">100 / 100</div><div class="bar"><i id="hpBar"></i></div><div class="small" style="margin-top:5px" id="levelText">Lv. 1 · 0 EXP</div></div>
 <div class="hudbox" style="text-align:right"><div class="small" id="mapName">凡人山林・秘境</div><div class="value" id="killText">擊殺 0</div><div class="small" id="effText">效率計算中</div></div></div>
 <div id="bossbar"><div id="bossname">秘境首領</div><div class="bar"><i id="bossHp"></i></div></div><div id="feed">靈氣流轉，正在自動探索秘境……</div><div id="pausehint">自動戰鬥 · 自動施法</div><div id="panel"></div></main>
 <nav><button data-tab="bag"><b>▣</b>背包</button><button data-tab="talent"><b>✧</b>天賦</button><button data-tab="skill"><b>❖</b>技能</button></nav>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@8.10.1/dist/pixi.min.js"></script>
 <script>
 (()=>{
 "use strict";
-const $=id=>document.getElementById(id),canvas=$("world"),ctx=canvas.getContext("2d");
+const $=id=>document.getElementById(id),world=$("world");
 const realms=[
 {name:"練氣期",start:1,end:13,area:"凡人山林",exp:9,hp:34,atk:4,spawn:1.05},
 {name:"築基期",start:14,end:22,area:"靈脈山谷",exp:27,hp:105,atk:9,spawn:.95},
@@ -67,9 +68,27 @@ const gearPool=[
 {name:"分光劍匣",slot:"weapon",rarity:"legend",desc:"攻擊力 +18，劍氣可追加飛劍。",atk:18,proc:"分光"},
 {name:"雷紋護符",slot:"ring",rarity:"legend",desc:"攻擊力 +9，雷擊可額外連鎖。",atk:9,proc:"雷鏈"}
 ];
-let W=0,H=0,dpr=1,last=0;
-function resize(){const r=canvas.getBoundingClientRect();dpr=Math.min(devicePixelRatio||1,2);W=r.width;H=r.height;canvas.width=Math.floor(W*dpr);canvas.height=Math.floor(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);if(!state.player.x){state.player.x=W/2;state.player.y=H/2}}
-window.addEventListener("resize",resize);resize();
+let W=0,H=0,last=0,app=null,worldLayer=null,glowLayer=null,fxLayer=null;
+const particlePool=[];
+class ParticleEmitter{
+ constructor(){this.items=[]}
+ emit(x,y,color,count=8,power=70){for(let i=0;i<count;i++){const a=Math.random()*Math.PI*2,v=power*(.25+Math.random()*.75);this.items.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:.35+Math.random()*.35,max:.7,color,size:1.5+Math.random()*3})}}
+ update(dt){this.items=this.items.filter(p=>{p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.96;p.vy*=.96;return p.life>0})}
+ draw(g){for(const p of this.items){g.circle(p.x,p.y,p.size*Math.max(.2,p.life/p.max)).fill({color:p.color,alpha:Math.min(1,p.life/p.max)})}}
+}
+const particles=new ParticleEmitter();
+async function setupRenderer(){
+ if(!window.PIXI){feed("渲染引擎載入失敗，請確認網路連線後重新整理。");return false}
+ app=new PIXI.Application();
+ await app.init({resizeTo:world,background:"#17231f",antialias:true,resolution:Math.min(window.devicePixelRatio||1,2),autoDensity:true,powerPreference:"high-performance"});
+ world.replaceChildren(app.canvas);app.canvas.style.width="100%";app.canvas.style.height="100%";app.canvas.style.display="block";
+ worldLayer=new PIXI.Graphics();glowLayer=new PIXI.Graphics();fxLayer=new PIXI.Graphics();
+ app.stage.addChild(worldLayer,glowLayer,fxLayer);
+ try{glowLayer.filters=[new PIXI.BlurFilter({strength:5,quality:2})];glowLayer.blendMode="add"}catch(e){console.warn("Glow filter fallback",e)}
+ resize();return true
+}
+function resize(){if(!world)return;const r=world.getBoundingClientRect();W=r.width;H=r.height;if(!state.player.x){state.player.x=W/2;state.player.y=H/2}}
+window.addEventListener("resize",resize);
 function realmIndex(l=state.level){return Math.max(0,realms.findIndex(r=>l>=r.start&&l<=r.end))}
 function realm(){return realms[realmIndex()]}
 function realmStage(){const i=realmIndex(),r=realms[i],n=state.level-r.start+1;if(i===0)return "練氣"+["一","二","三","四","五","六","七","八","九","十","十一","十二","十三"][n-1]+"層";return ["初期","中期","後期","圓滿"][Math.min(3,Math.floor((n-1)/Math.max(1,Math.ceil((r.end-r.start+1)/4))))]}
@@ -83,13 +102,38 @@ function dropGear(){const g={...gearPool[Math.floor(Math.random()*gearPool.lengt
 function equip(g){state.inventory.forEach(x=>{if(x.slot===g.slot)x.equipped=false});g.equipped=true;recalc();feed("已裝備："+g.name);renderPanel();updateHud()}
 function spawnEnemy(){const r=realm(),a=Math.random()*Math.PI*2,d=Math.max(W,H)*(.48+Math.random()*.18),boss=state.kills>0&&state.kills%80===0&&!state.boss,m=1+realmIndex()*.48,e={x:Math.max(15,Math.min(W-15,state.player.x+Math.cos(a)*d)),y:Math.max(85,Math.min(H-30,state.player.y+Math.sin(a)*d)),hp:r.hp*m*(boss?12:1),max:r.hp*m*(boss?12:1),atk:r.atk*m,boss,hit:0};if(boss){state.boss=e;$("bossbar").style.display="block";$("bossname").textContent="秘境首領・山魈王"}state.enemies.push(e)}
 function nearest(){let best=null,bd=Infinity;for(const e of state.enemies){const d=Math.hypot(e.x-state.player.x,e.y-state.player.y);if(d<bd){bd=d;best=e}}return best}
-function damage(e,n,color="#f4d18a"){if(!state.enemies.includes(e))return;e.hp-=n;e.hit=.15;state.effects.push({x:e.x,y:e.y-12,text:"-"+Math.round(n),life:.7,color});if(e.hp<=0)kill(e)}
+function damage(e,n,color="#f4d18a"){if(!state.enemies.includes(e))return;e.hp-=n;e.hit=.15;particles.emit(e.x,e.y,color,7,85);state.effects.push({x:e.x,y:e.y-12,text:"-"+Math.round(n),life:.7,color});if(e.hp<=0)kill(e)}
 function kill(e){const idx=state.enemies.indexOf(e);if(idx<0)return;state.enemies.splice(idx,1);if(e.boss){state.boss=null;$("bossbar").style.display="none";feed("擊敗秘境首領！獲得額外獎勵。");dropGear();dropGear()}state.kills++;state.recentKills++;addXp(realm().exp*(e.boss?15:1));if(Math.random()<.12||e.boss)dropGear();if(state.lifeSteal>0)state.hp=Math.min(state.maxHp,state.hp+state.maxHp*state.lifeSteal);if(state.skills.includes("吸靈訣"))state.hp=Math.min(state.maxHp,state.hp+2)}
-function playerAttack(t){const d=state.atk*(Math.random()*100<state.crit?2:1);damage(t,d);state.effects.push({x:(state.player.x+t.x)/2,y:(state.player.y+t.y)/2,text:"✦",life:.22,color:"#a9d8ff"});if(state.inventory.some(g=>g.equipped&&g.proc==="雷擊")&&Math.random()<.22)damage(t,state.atk*.8,"#8fdcff");if(state.inventory.some(g=>g.equipped&&g.proc==="分光")){const other=state.enemies.find(e=>e!==t&&Math.hypot(e.x-t.x,e.y-t.y)<120);if(other)damage(other,state.atk*.55,"#a9d8ff")}}
+function playerAttack(t){particles.emit(state.player.x,state.player.y,"#a9d8ff",5,55);const d=state.atk*(Math.random()*100<state.crit?2:1);damage(t,d);state.effects.push({x:(state.player.x+t.x)/2,y:(state.player.y+t.y)/2,text:"✦",life:.22,color:"#a9d8ff"});if(state.inventory.some(g=>g.equipped&&g.proc==="雷擊")&&Math.random()<.22)damage(t,state.atk*.8,"#8fdcff");if(state.inventory.some(g=>g.equipped&&g.proc==="分光")){const other=state.enemies.find(e=>e!==t&&Math.hypot(e.x-t.x,e.y-t.y)<120);if(other)damage(other,state.atk*.55,"#a9d8ff")}}
 function castSkills(t,now){if(!t)return;const active=(name,cd,fn)=>{if(state.skills.includes(name)&&now-(state.skillTimers[name]||0)>cd*1000/state.castSpeed){state.skillTimers[name]=now;fn()}};active("劍氣斬",2.4,()=>{damage(t,state.atk*1.8,"#a9d8ff");state.effects.push({x:t.x,y:t.y,text:"劍氣",life:.5,color:"#b7e2ff"})});active("雷球術",6,()=>{state.enemies.slice(0,4).forEach((e,i)=>damage(e,state.atk*1.25*(1-i*.12),"#8fdcff"));feed("雷球術引發連鎖雷擊！")});active("飛劍追擊",3.8,()=>damage(t,state.atk*1.1,"#b7e2ff"));active("護體靈盾",18,()=>{if(state.hp<state.maxHp*.45){state.hp=Math.min(state.maxHp,state.hp+state.maxHp*.18);feed("護體靈盾自動恢復氣血。")}else state.skillTimers["護體靈盾"]=now-17000})}
 function step(dt,now){const p=state.player,t=nearest();if(!state.boss&&state.enemies.length<12&&now-state.spawnAt>realm().spawn*1000){spawnEnemy();state.spawnAt=now}if(t){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy)||1;p.angle=Math.atan2(dy,dx);if(d>42){p.x+=dx/d*state.moveSpeed*55*dt;p.y+=dy/d*state.moveSpeed*55*dt;p.x=Math.max(12,Math.min(W-12,p.x));p.y=Math.max(80,Math.min(H-12,p.y))}else if(now-state.attackAt>720/state.attackSpeed){state.attackAt=now;playerAttack(t)}castSkills(t,now)}for(const e of [...state.enemies]){const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;if(d>35){e.x+=dx/d*18*dt;e.y+=dy/d*18*dt}else if(now-(e.lastHit||0)>1200){e.lastHit=now;state.hp-=Math.max(1,e.atk-state.def);state.effects.push({x:p.x,y:p.y-18,text:"受擊",life:.5,color:"#ff9999"});if(state.hp<=0){state.hp=state.maxHp*.55;state.enemies=[];feed("修士重傷，靈力護持後撤回秘境入口。")}}if(e.boss)$("bossHp").style.width=Math.max(0,e.hp/e.max*100)+"%"}state.effects=state.effects.filter(f=>{f.life-=dt;return f.life>0});state.enemies.forEach(e=>e.hit=Math.max(0,e.hit-dt));if(now-state.lastStat>5000){state.expPerHour=state.recentKills*realm().exp*720;state.recentKills=0;state.lastStat=now;updateHud()}}
-function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle="#17231f";ctx.fillRect(0,0,W,H);ctx.strokeStyle="#263c34";ctx.lineWidth=1;for(let x=0;x<W;x+=42){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=42){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}for(let i=0;i<26;i++){const x=(i*97+31)%W,y=(i*139+63)%H;ctx.fillStyle=i%2?"#304a3d":"#3a4b3d";ctx.beginPath();ctx.arc(x,y,4+(i%4)*2,0,Math.PI*2);ctx.fill()}for(const e of state.enemies){ctx.save();ctx.translate(e.x,e.y);ctx.fillStyle=e.boss?"#bd5963":e.hit>0?"#fff":"#78916c";ctx.beginPath();ctx.ellipse(0,0,e.boss?17:9,e.boss?19:11,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#d8e6c8";ctx.beginPath();ctx.arc(-3,-3,2,0,7);ctx.arc(3,-3,2,0,7);ctx.fill();ctx.restore();if(e.hp<e.max){ctx.fillStyle="#401e25";ctx.fillRect(e.x-13,e.y-17,26,3);ctx.fillStyle="#d76b69";ctx.fillRect(e.x-13,e.y-17,26*Math.max(0,e.hp/e.max),3)}}const p=state.player;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle);ctx.fillStyle="#e8c77c";ctx.beginPath();ctx.moveTo(13,0);ctx.lineTo(-8,-8);ctx.lineTo(-5,0);ctx.lineTo(-8,8);ctx.closePath();ctx.fill();ctx.fillStyle="#6fa8c9";ctx.beginPath();ctx.arc(-1,0,7,0,Math.PI*2);ctx.fill();ctx.restore();for(const f of state.effects){ctx.globalAlpha=Math.min(1,f.life*2);ctx.fillStyle=f.color;ctx.font="bold 12px sans-serif";ctx.textAlign="center";ctx.fillText(f.text,f.x,f.y-(.7-f.life)*25);ctx.globalAlpha=1}}
-function loop(now){const dt=Math.min(.05,(now-last)/1000||0);last=now;step(dt,now);draw();updateHud();requestAnimationFrame(loop)}
+function draw(dt=0){
+ if(!app||!worldLayer)return;
+ const g=worldLayer,gl=glowLayer,fx=fxLayer;g.clear();gl.clear();fx.clear();
+ g.rect(0,0,W,H).fill("#17231f");
+ // Atmospheric ground: layered stone patches and subtle terrain seams.
+ for(let i=0;i<34;i++){const x=(i*137+31)%Math.max(1,W),y=(i*173+63)%Math.max(1,H);g.ellipse(x,y,18+(i%5)*5,8+(i%3)*4).fill({color:i%2?"#263a31":"#304237",alpha:.32})}
+ for(let x=0;x<W;x+=64)g.moveTo(x,0).lineTo(x,H).stroke({color:"#34483c",alpha:.18,width:1});
+ for(let y=0;y<H;y+=64)g.moveTo(0,y).lineTo(W,y).stroke({color:"#34483c",alpha:.18,width:1});
+ // Ambient runic motes.
+ for(let i=0;i<18;i++){const x=(i*113+47)%Math.max(1,W),y=(i*191+91)%Math.max(1,H);g.circle(x,y,1.4).fill({color:"#a5c99c",alpha:.32})}
+ for(const e of state.enemies){
+   const r=e.boss?17:10;
+   if(e.boss){gl.circle(e.x,e.y,r+9).fill({color:"#df6674",alpha:.55});g.ellipse(e.x,e.y,r+3,r+6).fill("#4b2630");g.ellipse(e.x,e.y-2,r,r+3).fill(e.hit>0?"#fff0e8":"#bd5963");g.circle(e.x-5,e.y-4,2).fill("#ffe2a6");g.circle(e.x+5,e.y-4,2).fill("#ffe2a6")}
+   else{g.ellipse(e.x,e.y+3,r+3,r-2).fill({color:"#080e0c",alpha:.35});g.ellipse(e.x,e.y,r,r+2).fill(e.hit>0?"#fff":"#6d896b");g.ellipse(e.x,e.y-6,7,7).fill("#829d76");g.circle(e.x-3,e.y-6,1.4).fill("#e4dca7");g.circle(e.x+3,e.y-6,1.4).fill("#e4dca7")}
+   if(e.hp<e.max){g.roundRect(e.x-14,e.y-19,28,4,2).fill("#321e25");g.roundRect(e.x-14,e.y-19,28*Math.max(0,e.hp/e.max),4,2).fill("#d76b69")}
+ }
+ const p=state.player;
+ gl.circle(p.x,p.y,19).fill({color:"#e6c77d",alpha:.52});
+ g.ellipse(p.x,p.y+8,10,5).fill({color:"#050a0e",alpha:.5});
+ g.circle(p.x,p.y,10).fill("#28465d");g.circle(p.x,p.y-2,7).fill("#7caecb");
+ const tipX=p.x+Math.cos(p.angle)*20,tipY=p.y+Math.sin(p.angle)*20;
+ g.moveTo(p.x+Math.cos(p.angle+2.4)*8,p.y+Math.sin(p.angle+2.4)*8).lineTo(tipX,tipY).lineTo(p.x+Math.cos(p.angle-2.4)*8,p.y+Math.sin(p.angle-2.4)*8).stroke({color:"#f0d28b",width:3});
+ particles.draw(fx);
+ for(const f of state.effects){const alpha=Math.min(1,f.life*2);fx.circle(f.x,f.y,7+f.life*8).fill({color:f.color,alpha:alpha*.18});}
+ app.renderer.render(app.stage);
+}
+function loop(now){const dt=Math.min(.05,(now-last)/1000||0);last=now;step(dt,now);particles.update(dt);draw(dt);updateHud();requestAnimationFrame(loop)}
 function closePanel(){state.activeTab=null;$("panel").classList.remove("open");document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"))}
 function renderPanel(){const tab=state.activeTab;if(!tab)return;let body="";if(tab==="bag"){body+='<div class="card"><div class="row"><b>角色屬性</b><span class="tag">無職業限制</span></div><div class="stat">攻擊 '+state.atk.toFixed(1)+'　防禦 '+state.def+'　生命 '+Math.round(state.maxHp)+'<br>攻速 '+state.attackSpeed.toFixed(2)+'　施法 '+state.castSpeed.toFixed(2)+'　移速 '+state.moveSpeed.toFixed(2)+'</div></div><div class="row"><b>裝備背包</b><span class="muted">'+state.inventory.length+' 件</span></div>';if(!state.inventory.length)body+='<div class="card muted">尚未取得裝備，繼續探索秘境尋找掉落。</div>';state.inventory.forEach(g=>{body+='<div class="item"><div class="row"><h3 class="'+g.rarity+'">'+g.name+'</h3><span class="tag">'+({common:"普通",rare:"稀有",epic:"史詩",legend:"傳說"}[g.rarity])+'</span></div><p>'+g.desc+'</p><div class="row"><span class="muted">'+(g.equipped?"已裝備":"未裝備")+'</span><button class="btn" data-equip="'+g.id+'" '+(g.equipped?"disabled":"")+'>'+(g.equipped?"使用中":"裝備")+'</button></div></div>'})}
 if(tab==="talent"){body+='<div class="card"><b>天賦構築</b><p class="muted" style="font-size:11px">沒有職業限制，依照想玩的流派自由配置。</p><div class="stat">已配置 '+state.talents.length+' / 6 點</div></div>';talentDefs.forEach((t,i)=>{const on=state.talents.includes(i);body+='<div class="item"><div class="row"><h3>'+t.name+'</h3><button class="btn" data-talent="'+i+'" '+(on||state.talents.length>=6?"disabled":"")+'>'+(on?"已學習":"學習")+'</button></div><p>'+t.desc+'</p></div>'});body+='<button class="btn" id="resetTalents">重置天賦</button>'}
@@ -100,7 +144,7 @@ $("panel").querySelectorAll("[data-talent]").forEach(b=>b.onclick=()=>{const i=+
 $("panel").querySelectorAll("[data-skill]").forEach(b=>b.onclick=()=>{const n=b.dataset.skill;state.skills=state.skills.includes(n)?state.skills.filter(x=>x!==n):[...state.skills,n];renderPanel()});
 const reset=$("resetTalents");if(reset)reset.onclick=()=>{state.talents=[];recalc();renderPanel();updateHud()}}
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{const t=b.dataset.tab;if(state.activeTab===t){closePanel();return}state.activeTab=t;document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("active",x===b));renderPanel()}));
-function init(){recalc();updateHud();for(let i=0;i<4;i++)spawnEnemy();requestAnimationFrame(loop)}
+async function init(){recalc();updateHud();const ok=await setupRenderer();if(!ok)return;for(let i=0;i<4;i++)spawnEnemy();last=performance.now();requestAnimationFrame(loop)}
 init();
 })();
 </script></body></html>
