@@ -146,7 +146,7 @@ function drawEnemy(e,t){
  if(e.hp<e.max){ctx.fillStyle='rgba(0,0,0,.72)';ctx.fillRect(e.x-bw/2,top,bw,bh);ctx.fillStyle=e.type==='boss'?'#c55b55':e.type==='elite'?'#c58b61':'#a64a4a';ctx.fillRect(e.x-bw/2,top,bw*Math.max(0,e.hp/e.max),bh)}
 }
 function draw(){ctx.clearRect(0,0,W,H);const t=elapsed;
- if(sceneBg.complete&&sceneBg.naturalWidth){const scale=Math.max(W/sceneBg.width,H/sceneBg.height),bw=sceneBg.width*scale,bh=sceneBg.height*scale;ctx.filter='brightness(1.42) saturate(1.22) contrast(1.08)';ctx.drawImage(sceneBg,(W-bw)/2,(H-bh)/2,bw,bh);ctx.filter='none';ctx.fillStyle='rgba(12,9,15,.045)';ctx.fillRect(0,0,W,H)}else{ctx.fillStyle='#100d12';ctx.fillRect(0,0,W,H)}
+ if(sceneBg.complete&&sceneBg.naturalWidth){const scale=Math.max(W/sceneBg.width,H/sceneBg.height),bw=sceneBg.width*scale,bh=sceneBg.height*scale;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.filter='brightness(1.12) saturate(1.08) contrast(1.06)';ctx.drawImage(sceneBg,(W-bw)/2,(H-bh)/2,bw,bh);ctx.filter='none';ctx.fillStyle='rgba(12,9,15,.025)';ctx.fillRect(0,0,W,H)}else{ctx.fillStyle='#100d12';ctx.fillRect(0,0,W,H)}
  // ground mist and embers
  for(let i=0;i<14;i++){let x=(i*97+t*7)%W,y=H*.37+(i*53% (H*.42));ctx.fillStyle='rgba(218,126,83,'+(.025+((i%3)*.012))+')';ctx.beginPath();ctx.arc(x,y,1.2+(i%2),0,Math.PI*2);ctx.fill()}
  // subtle floor perspective
