@@ -125,8 +125,6 @@ function draw(dt=0){
  g.rect(0,0,W,H).fill("#17231f");
  // Layered forest-floor texture, scattered stones and ancient moss.
  for(let i=0;i<46;i++){const x=(i*137+31)%Math.max(1,W),y=(i*173+63)%Math.max(1,H);g.ellipse(x,y,20+(i%5)*7,9+(i%3)*5).fill({color:i%2?"#263a31":"#304237",alpha:.28});if(i%3===0){g.circle(x+13,y-5,2).fill({color:"#788d67",alpha:.42});g.moveTo(x-8,y+3).lineTo(x+3,y+1).stroke({color:"#52654d",alpha:.3,width:2})}}
- for(let x=0;x<W;x+=76)g.moveTo(x,0).lineTo(x,H).stroke({color:"#52614b",alpha:.10,width:1});
- for(let y=0;y<H;y+=76)g.moveTo(0,y).lineTo(W,y).stroke({color:"#52614b",alpha:.10,width:1});
  // Broken flagstones and ancient roots create a readable forest path.
  for(let i=0;i<9;i++){const x=(i*91+27)%Math.max(1,W),y=(i*157+130)%Math.max(1,H);g.roundRect(x,y,24+(i%3)*9,10+(i%2)*5,3).fill({color:"#596052",alpha:.24});g.moveTo(x+4,y+3).lineTo(x+13,y+6).stroke({color:"#9b987d",alpha:.18,width:1})}
  for(let i=0;i<7;i++){const x=(i*149+68)%Math.max(1,W),y=(i*211+210)%Math.max(1,H);g.moveTo(x-24,y+16).bezierCurveTo(x-6,y-2,x+8,y+7,x+25,y-18).stroke({color:"#536247",alpha:.45,width:3});g.moveTo(x-15,y+10).lineTo(x-27,y-1).stroke({color:"#536247",alpha:.34,width:2})}
