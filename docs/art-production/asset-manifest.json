@@ -1,7 +1,7 @@
 {
   "project": "Ashen Oath",
-  "version": "0.2.0-art-foundation",
-  "status": "source-assets-prepared-not-yet-runtime-integrated",
+  "version": "0.3.0-runtime-art-integration",
+  "status": "first-runtime-art-pass-integrated",
   "target": {
     "orientation": "portrait",
     "battlefield": "full-screen",
@@ -20,20 +20,29 @@
   "assets": [
     {
       "id": "environment.chapter1",
-      "path": "environments/ashen-courtyard-master.webp",
-      "status": "source-ready"
+      "path": "embedded-in-index.html#world-background",
+      "status": "runtime-integrated-low-resolution-mobile-pass",
+      "sourcePackagePath": "environments/ashen-courtyard-master.webp"
     },
     {
       "id": "hero.ashenKnight",
-      "path": "characters/ashen-knight/ashen-knight-4x2-sheet.webp",
-      "status": "sheet-generated-frame-validation-required",
+      "path": "embedded-in-index.html#heroSprite",
+      "status": "runtime-integrated-8-frame-sheet",
       "columns": 4,
-      "rows": 2
+      "rows": 2,
+      "frameSize": [
+        64,
+        64
+      ],
+      "states": {
+        "idleMove": "row-1-frames-1-to-4",
+        "attack": "row-2-frames-1-to-4"
+      }
     },
     {
       "id": "monster.ashWraith",
       "path": "monsters/ash-wraith/ash-wraith-4-frame.webp",
-      "status": "sheet-generated-frame-validation-required",
+      "status": "runtime-integrated-4-frame-sheet",
       "columns": 4,
       "rows": 1
     },
@@ -50,23 +59,25 @@
       "status": "frame-only-liquid-layers-required"
     },
     {
-      "id": "monster.skeletalRevenant",
-      "path": "monsters/skeletal-revenant/skeletal-revenant-source-sheet.webp",
-      "status": "source-reference-only-checkerboard-not-alpha",
-      "columns": 4,
-      "rows": 1
-    },
-    {
       "id": "concept.portraitBattle",
       "path": "concepts/portrait-battle-hud-reference.webp",
       "status": "visual-reference-only-not-runtime"
+    },
+    {
+      "id": "monster.chapterBoss",
+      "path": "boss-warden-4frame.webp",
+      "status": "generated-source-not-integrated",
+      "columns": 4,
+      "rows": 1
     }
   ],
   "qualityGates": [
-    "verify true alpha channel",
-    "verify sprite frame bounds and alignment",
-    "standardize foot anchors and in-game scale",
-    "test mobile portrait readability",
-    "replace placeholder geometry and emoji art before art-complete status"
+    "hero 8-frame sprite sheet integrated and syntax checked",
+    "chapter background integrated as embedded image",
+    "enemy sprite atlas remains integrated for common/elite enemies",
+    "boss-specific sprite still requires runtime integration",
+    "verify visual output in real mobile browser",
+    "replace remaining emoji skill and equipment icons",
+    "complete HP/MP orb artwork and UI panels"
   ]
 }
