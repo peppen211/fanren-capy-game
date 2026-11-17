@@ -132,7 +132,7 @@ const skillBook=[['裂地斬','⚔','向前斬出一道沉重劍氣，對近距�
 const gearNames=['武器','頭盔','胸甲','手套','靴子','戒指'],gearKeys=['weapon','helm','chest','gloves','boots','ring'];
 const names=['腐化侍從','裂爪獵犬','灰燼行刑者','聖庭看守','墮落的守門者'];
 const gemPool=[['鋒銳寶石','◆','增加技能傷害'],['迅捷寶石','◇','增加攻擊速度'],['灼熱寶石','✦','附加火焰傷害'],['汲魂寶石','◉','造成傷害時恢復生命'],['擴張寶石','✧','增加技能範圍']];
-let W=0,H=0,dpr=1,elapsed=0;
+let W=0,H=0,dpr=1,elapsed=0,lastSkillUiStep=-1;
 function resize(){const r=canvas.getBoundingClientRect();dpr=1;W=r.width;H=r.height;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);if(!state.x){state.x=W*.5;state.y=H*.66}}
 addEventListener('resize',resize);resize();
 function rand(a,b){return a+Math.random()*(b-a)}
@@ -173,7 +173,7 @@ function draw(){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#100d12'
  state.enemies.forEach(e=>drawEnemy(e,t));if(state.groundLoot){state.groundLoot.forEach(l=>{ctx.save();ctx.shadowColor='#e6c36e';ctx.shadowBlur=14;ctx.fillStyle=l.item.kind==='gem'?'#a98bdb':'#d8b66f';ctx.beginPath();ctx.moveTo(l.x,l.y-18);ctx.lineTo(l.x+7,l.y-10);ctx.lineTo(l.x,l.y-2);ctx.lineTo(l.x-7,l.y-10);ctx.closePath();ctx.fill();ctx.restore()})}drawHero(state.x,state.y,t);
  if(state.groundLoot){for(const loot of state.groundLoot){loot.life-=dt;const d=Math.hypot(loot.x-state.x,loot.y-state.y);if(d<52){state.inventory.push(loot.item);loot.life=0;/* pickup text intentionally hidden */}}state.groundLoot=state.groundLoot.filter(l=>l.life>0)}
  if(renderDiag==='actors-bg')return;state.particles=state.particles.filter(p=>p.life>0);for(const p of state.particles){p.life-=.03;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;if(renderDiag==='actors-particles')return;
- document.querySelectorAll('.skill').forEach((el,i)=>{const left=state.cooldowns[i]||0,total=state.cooldownMax[i]||1;el.classList.toggle('cool',left>0);el.style.setProperty('--cd',(left/total*100)+'%');const label=el.querySelector('.cdtext');if(label)label.textContent=left>0?left.toFixed(1):''});
+ const skillUiStep=Math.floor(elapsed*10);if(skillUiStep!==lastSkillUiStep){lastSkillUiStep=skillUiStep;document.querySelectorAll('.skill').forEach((el,i)=>{const left=state.cooldowns[i]||0,total=state.cooldownMax[i]||1,cd=(left/total*100).toFixed(1)+'%';const cooling=left>0;if(el.dataset.cooling!==(cooling?'1':'0')){el.classList.toggle('cool',cooling);el.dataset.cooling=cooling?'1':'0'}if(el.dataset.cd!==cd){el.style.setProperty('--cd',cd);el.dataset.cd=cd}const label=el.querySelector('.cdtext'),txt=cooling?left.toFixed(1):'';if(label&&label.textContent!==txt)label.textContent=txt})}
 }
 function update(dt){elapsed+=dt;state.spawn-=dt;state.attack-=dt;if(state.spawn<=0&&state.enemies.filter(e=>e.type!=='boss').length<9){enemySpawn();state.spawn=rand(1.05,1.65)}
  if(state.stage===6&&!state.boss&&state.kills>14){enemySpawn(true);/* remain in stage six during the boss encounter */}
