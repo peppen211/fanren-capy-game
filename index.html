@@ -107,6 +107,7 @@
 const $=id=>document.getElementById(id), canvas=$('battle'),ctx=canvas.getContext('2d',{alpha:false,desynchronized:false});
 // Use one opaque render surface for both environment and combat to avoid
 // iOS Safari seams between a transparent canvas and the CSS background.
+const renderDiag=new URLSearchParams(location.search).get('diag');
 const sceneBg=new Image();
 const worldBg=getComputedStyle($('world')).backgroundImage;
 const embeddedBg=worldBg.match(/url\(["']?(.*?)["']?\)/);
@@ -158,7 +159,7 @@ function drawEnemy(e,t){
 }
 function draw(){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#100d12';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.restore();ctx.setTransform(dpr,0,0,dpr,0,0);const t=elapsed;
  // Paint environment and actors into one opaque canvas layer.
- if(sceneBg.complete&&sceneBg.naturalWidth){const scale=Math.max(W/sceneBg.width,H/sceneBg.height),bw=sceneBg.width*scale,bh=sceneBg.height*scale;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.filter='brightness(1.12) saturate(1.08) contrast(1.06)';ctx.drawImage(sceneBg,(W-bw)/2,(H-bh)/2,bw,bh);ctx.filter='none'}else{ctx.fillStyle='#100d12';ctx.fillRect(0,0,W,H)}
+ if(renderDiag==='actors'){ctx.fillStyle='#24202a';ctx.fillRect(0,0,W,H)}else if(sceneBg.complete&&sceneBg.naturalWidth){const scale=Math.max(W/sceneBg.width,H/sceneBg.height),bw=sceneBg.width*scale,bh=sceneBg.height*scale;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.filter='brightness(1.12) saturate(1.08) contrast(1.06)';ctx.drawImage(sceneBg,(W-bw)/2,(H-bh)/2,bw,bh);ctx.filter='none'}else{ctx.fillStyle='#100d12';ctx.fillRect(0,0,W,H)}if(renderDiag==='bg')return;
  // ground mist and embers
  for(let i=0;i<14;i++){let x=(i*97+t*7)%W,y=H*.37+(i*53% (H*.42));ctx.fillStyle='rgba(218,126,83,'+(.025+((i%3)*.012))+')';ctx.beginPath();ctx.arc(x,y,1.2+(i%2),0,Math.PI*2);ctx.fill()}  // Keep the painted floor uninterrupted; no synthetic scan or guide lines.
  state.enemies.forEach(e=>drawEnemy(e,t));if(state.groundLoot){state.groundLoot.forEach(l=>{ctx.save();ctx.shadowColor='#e6c36e';ctx.shadowBlur=14;ctx.fillStyle=l.item.kind==='gem'?'#a98bdb':'#d8b66f';ctx.beginPath();ctx.moveTo(l.x,l.y-18);ctx.lineTo(l.x+7,l.y-10);ctx.lineTo(l.x,l.y-2);ctx.lineTo(l.x-7,l.y-10);ctx.closePath();ctx.fill();ctx.restore()})}drawHero(state.x,state.y,t);
