@@ -49,8 +49,8 @@
 - [x] 生成第一批森林環境物件造型參考表
 - [x] 建立素材 key 與用途清單
 - [ ] 逐件裁切、去背與標準化
-- [ ] 將正式 PNG/WebP 檔加入 assets/environment 與 assets/effects
-- [ ] 建立 PixiJS atlas 與載入程式
+- [x] 將第一批獨立 SVG 環境素材加入 assets/environment（古樹、竹叢、苔石、祭壇）
+- [x] 建立 PixiJS 獨立 SVG 載入與環境圖層（目前為四個獨立 texture，尚未合併 atlas）
 - [ ] 在 iPhone Safari 驗證尺寸、透明度、層級和效能
 
-注意：本輪已完成的是素材設計稿和資產規格，尚未將圖片二進位檔加入 GitHub，也尚未改動遊戲執行時的場景載入程式。
+注意：目前已將四個獨立 SVG 素材提交至 GitHub，並接入 PixiJS 環境圖層；尚未完成 iPhone Safari 實機驗證、碰撞區配置、Tiled 執行時載入或正式逐格動畫。
