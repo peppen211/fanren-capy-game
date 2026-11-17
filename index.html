@@ -111,7 +111,7 @@ const renderDiag=new URLSearchParams(location.search).get('diag');
 if(renderDiag==='ui'){
   $('world').style.display='none';
   const uiOnly=document.createElement('style');
-  uiOnly.textContent='#game{background:#24202a}.topbar,.bossbar,.hud,.panel-scrim,.drawer,.toast{display:none!important}';
+  uiOnly.textContent='#game{background:#24202a}';
   document.head.appendChild(uiOnly);
 }
 
