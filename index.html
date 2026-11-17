@@ -1,167 +1,199 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#10151d">
-<title>凡人仙途：無盡秘境</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#100d12"><meta name="description" content="灰燼誓約：暗黑奇幻自動戰鬥刷寶原型">
+<title>灰燼誓約 · Ashen Oath</title>
 <style>
-:root{color-scheme:dark;--bg:#0c1119;--line:#2c3c50;--gold:#e9c477;--jade:#69c9a0;--text:#edf2f7;--muted:#91a0b3}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif}button{font:inherit;color:inherit;cursor:pointer}#app{height:100dvh;display:flex;flex-direction:column;background:#0c1119}
-header{height:54px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid #263344;background:#101722;z-index:3}header .brand{font-weight:800;letter-spacing:.04em;font-size:15px}header .realm{font-size:12px;color:var(--gold);padding:6px 9px;border:1px solid #665638;border-radius:20px}
-#battle{position:relative;flex:1;min-height:0;overflow:hidden;background:#111b20}canvas{display:block;width:100%;height:100%;touch-action:none}
-.hud{position:absolute;left:12px;right:12px;top:10px;pointer-events:none;display:flex;justify-content:space-between;gap:10px}.hudbox{background:#0b121bd9;border:1px solid #334253;border-radius:12px;padding:8px 10px;backdrop-filter:blur(8px);min-width:112px;box-shadow:0 5px 18px #0005}
-.small{font-size:11px;color:var(--muted)}.value{font-weight:800;font-size:14px}.bar{height:6px;background:#293544;border-radius:8px;overflow:hidden;margin-top:5px}.bar>i{display:block;height:100%;background:linear-gradient(90deg,#4ba77f,#91d5a5);width:0%}
-#feed{position:absolute;left:12px;bottom:12px;max-width:68%;font-size:11px;color:#dce6ee;background:#0b121bb8;padding:7px 9px;border-radius:9px;pointer-events:none}#bossbar{position:absolute;top:78px;left:16%;right:16%;display:none;text-align:center;font-size:11px;color:#f0c8a0;pointer-events:none}#bossbar .bar>i{background:linear-gradient(90deg,#a94f58,#e69c74)}#pausehint{position:absolute;right:12px;bottom:12px;font-size:10px;color:#d0d8df;background:#0b121bb8;padding:6px 8px;border-radius:8px;pointer-events:none}
-nav{height:66px;flex:none;display:grid;grid-template-columns:repeat(3,1fr);padding:5px 10px calc(5px + env(safe-area-inset-bottom));background:#111a26;border-top:1px solid #2a394b;z-index:5}nav button{background:transparent;border:0;color:#9baabc;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px}nav button b{font-size:20px;font-weight:500}nav button.active{color:var(--gold)}
-#panel{position:absolute;inset:0;background:#0c121bf2;z-index:4;display:none;overflow:auto;padding:16px 14px 24px}#panel.open{display:block}.panelhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.panelhead h2{font-size:20px;margin:0}.close{background:#263548;border:1px solid #41536a;border-radius:9px;padding:7px 12px;font-size:12px}
-.card{background:linear-gradient(145deg,#192534,#121b27);border:1px solid var(--line);border-radius:13px;padding:12px;margin-bottom:10px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.muted{color:var(--muted)}.tag{font-size:10px;border:1px solid #46566b;border-radius:20px;padding:3px 7px;color:#b9c7d6}.btn{background:#344b60;border:1px solid #56708a;padding:8px 11px;border-radius:9px;font-size:12px}.btn:disabled{opacity:.4}.item{background:#1a2736;border:1px solid #35475c;border-radius:10px;padding:10px;margin:6px 0}.item h3{font-size:13px;margin:0 0 5px}.item p{font-size:11px;color:#aebccc;margin:0 0 8px;line-height:1.5}.common{color:#d5dce4}.rare{color:#78b8ee}.epic{color:#c19aff}.legend{color:#f0c66e}.stat{font-size:12px;color:#b8c5d3;line-height:1.8}.note{font-size:10px;color:#78899d;text-align:center;padding:12px}
-@media(min-width:700px){#app{max-width:760px;margin:auto;border-left:1px solid #273548;border-right:1px solid #273548}header{height:60px}nav{height:72px}}
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap');
+:root{color-scheme:dark;--gold:#c7a56a;--gold2:#e4c78b;--ink:#100d12;--panel:rgba(17,14,19,.94);--line:rgba(205,174,119,.34);--red:#a83d42;--blue:#527da8;--violet:#9471bd}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100d12;color:#eee8dc;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation}button{font:inherit;color:inherit}
+#game{position:relative;width:100%;height:100dvh;min-height:520px;overflow:hidden;background:#17121a}
+#world{position:absolute;inset:0;overflow:hidden;background:linear-gradient(180deg,#29202a 0%,#4b3035 24%,#29212a 52%,#15141a 100%)}
+#world:before{content:"";position:absolute;inset:-4%;background:
+radial-gradient(ellipse at 50% 20%,rgba(204,111,83,.2),transparent 43%),
+linear-gradient(180deg,transparent 0 35%,rgba(10,9,13,.15) 52%,rgba(8,8,11,.82) 100%),
+repeating-linear-gradient(165deg,transparent 0 78px,rgba(213,176,133,.025) 79px 81px,transparent 82px 150px);
+}
+.ruin{position:absolute;inset:0;opacity:.9;pointer-events:none}
+.ruin svg{width:100%;height:100%;display:block}
+#battle{position:absolute;inset:0;width:100%;height:100%;z-index:2}
+.vignette{position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(90deg,rgba(8,7,10,.32),transparent 22%,transparent 78%,rgba(8,7,10,.3)),linear-gradient(0deg,rgba(5,5,8,.58),transparent 23%,transparent 70%,rgba(7,6,9,.2))}
+.topbar{position:absolute;z-index:6;top:env(safe-area-inset-top,0);left:0;right:0;padding:12px 16px 0;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+.brand{font-family:Cinzel,serif;letter-spacing:.17em;font-size:12px;color:#d9bf8b;text-shadow:0 2px 12px #000}
+.stage{text-align:right;color:#e7d8bd;font-size:11px;letter-spacing:.1em;text-shadow:0 2px 8px #000}.stage strong{display:block;font:600 17px Cinzel,serif;color:#f1dfb7;letter-spacing:.06em;margin-top:3px}
+.bossbar{position:absolute;z-index:5;top:62px;left:17%;right:17%;display:none;text-align:center}.bossbar.show{display:block}.bossname{font:600 12px Cinzel,serif;letter-spacing:.18em;color:#f0d9bb;margin-bottom:5px;text-shadow:0 2px 5px #000}.bar{height:5px;background:#211519;border:1px solid #6f3c40;border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#68272e,#d45b53);box-shadow:0 0 12px #d45b53}
+#floating{position:absolute;inset:0;z-index:4;pointer-events:none}
+.float{position:absolute;font:700 13px Cinzel,serif;text-shadow:0 2px 5px #000;animation:floatup .9s ease-out forwards}.float.hit{color:#f0d1bb}.float.crit{color:#ffdc8b;font-size:17px}.float.heal{color:#8bd2a0}.float.loot{color:#e5c98f}
+@keyframes floatup{0%{opacity:0;transform:translate(-50%,0) scale(.8)}15%{opacity:1}100%{opacity:0;transform:translate(-50%,-44px) scale(1.05)}}
+.hud{position:absolute;z-index:8;left:0;right:0;bottom:0;padding:0 13px calc(12px + env(safe-area-inset-bottom,0));pointer-events:none}
+.hudrow{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.orb-wrap{width:78px;height:78px;position:relative;flex:none;pointer-events:auto;filter:drop-shadow(0 4px 9px #000)}
+.orb{width:100%;height:100%;border-radius:50%;border:2px solid #b89b6b;background:radial-gradient(circle at 35% 25%,#5d343b 0,#29151e 47%,#09090d 76%);box-shadow:inset 0 0 0 3px #211a1b,inset 0 0 15px #000,0 0 0 2px rgba(10,8,8,.8);overflow:hidden;position:relative}
+.orb-fill{position:absolute;inset:0;top:auto;height:70%;background:linear-gradient(180deg,#c45d5c,#79252f 58%,#3d111d);transition:height .25s;clip-path:ellipse(75% 70% at 50% 100%)}
+.orb-fill:after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.22),transparent 35%,rgba(0,0,0,.25))}
+.orb-es{position:absolute;inset:5px;border:2px solid rgba(109,172,211,.65);border-radius:50%;box-shadow:inset 0 0 13px rgba(99,164,220,.4),0 0 9px rgba(92,159,213,.2);pointer-events:none}
+.orb-mp{position:absolute;inset:10px;border:1px solid rgba(137,139,220,.7);border-radius:50%;box-shadow:inset 0 0 10px rgba(122,129,211,.25);pointer-events:none}
+.orb-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-shadow:0 2px 4px #000;font:600 12px Cinzel,serif}.orb-label small{font:10px 'Noto Sans TC';color:#e3d8ce;margin-top:1px}
+.orb-caption{position:absolute;top:-16px;left:0;right:0;text-align:center;font-size:9px;letter-spacing:.18em;color:#d7c6a5;text-shadow:0 2px 5px #000}
+.skills{display:flex;align-items:flex-end;gap:7px;pointer-events:auto;padding-bottom:2px}
+.skill{width:46px;height:49px;border:1px solid rgba(205,174,119,.58);border-radius:9px;background:linear-gradient(145deg,rgba(58,42,42,.95),rgba(13,12,17,.97));box-shadow:0 3px 10px #000,inset 0 0 12px rgba(202,158,100,.12);position:relative;display:grid;place-items:center;font-size:22px}
+.skill:after{content:"";position:absolute;inset:3px;border:1px solid rgba(230,205,158,.12);border-radius:6px}.skill small{position:absolute;bottom:2px;right:4px;font:9px Cinzel;color:#e5d4b3;text-shadow:0 1px 3px #000}.skill.cool{filter:grayscale(.7);opacity:.65}
+.menu-btn{width:53px;height:53px;border-radius:13px;border:1px solid #b99a69;background:linear-gradient(145deg,#493b35,#151219 72%);box-shadow:0 4px 12px #000,inset 0 0 14px rgba(219,178,116,.13);font-size:23px;pointer-events:auto;display:grid;place-items:center}
+.menu-btn:active,.skill:active{transform:scale(.96)}
+.panel-scrim{position:absolute;z-index:10;inset:0;background:rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity .25s}.panel-scrim.open{opacity:1;pointer-events:auto}
+.drawer{position:absolute;z-index:11;left:0;right:0;bottom:0;height:min(69dvh,590px);min-height:360px;background:linear-gradient(180deg,rgba(33,27,30,.98),rgba(13,12,17,.99));border-top:1px solid #9d8056;box-shadow:0 -12px 40px rgba(0,0,0,.55);transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);border-radius:17px 17px 0 0;padding-bottom:env(safe-area-inset-bottom,0);display:flex;flex-direction:column}
+.drawer.open{transform:translateY(0)}
+.drawer-head{height:54px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid rgba(195,161,107,.2)}
+.drawer-title{font:600 17px Cinzel,serif;letter-spacing:.1em;color:#e5d1a8}.close{border:1px solid #705d48;background:#211b1b;border-radius:8px;width:34px;height:30px;font-size:18px}
+.tabs{display:flex;gap:0;overflow-x:auto;flex:none;border-bottom:1px solid rgba(195,161,107,.2);scrollbar-width:none}.tabs button{flex:1;min-width:65px;padding:12px 7px;background:none;border:0;border-bottom:2px solid transparent;color:#a99c8d;font-size:12px;white-space:nowrap}.tabs button.active{color:#e5ca91;border-bottom-color:#c6a36c;background:linear-gradient(0deg,rgba(197,158,99,.1),transparent)}
+.panel-content{overflow:auto;padding:15px 16px 26px;flex:1;overscroll-behavior:contain}
+.panel-note{color:#a99c8d;font-size:11px;line-height:1.7;margin:0 0 12px}
+.card{border:1px solid rgba(191,158,107,.25);background:linear-gradient(135deg,rgba(45,37,38,.8),rgba(20,18,23,.85));border-radius:10px;padding:12px;margin-bottom:9px}
+.card h3{margin:0 0 7px;color:#e1c58e;font-size:13px;font-weight:600}.muted{color:#a99c8d;font-size:11px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.statgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.stat{padding:10px;border-radius:8px;background:rgba(0,0,0,.2);border:1px solid rgba(191,158,107,.16)}.stat b{display:block;font:600 16px Cinzel;color:#e8d5b1}.stat span{font-size:10px;color:#a99c8d}
+.action{border:1px solid #90734e;border-radius:7px;background:linear-gradient(180deg,#594533,#30251f);padding:7px 11px;font-size:11px;color:#f0dfbd}.action:disabled{opacity:.35}
+.item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(191,158,107,.12)}.item:last-child{border:0}.itemicon{width:40px;height:40px;flex:none;border:1px solid rgba(201,169,112,.45);border-radius:8px;display:grid;place-items:center;font-size:21px;background:radial-gradient(circle,#55413a,#17141a)}.iteminfo{min-width:0;flex:1}.iteminfo b{display:block;font-size:12px}.iteminfo small{font-size:10px;color:#aa9d8d;line-height:1.5;display:block}
+.gold{color:#e4c278}.rare{color:#77a9db}.epic{color:#c69ae4}.legend{color:#e5a45b}
+.slotrow{display:flex;gap:5px;margin-top:6px}.socket{width:18px;height:18px;border:1px solid #9a805c;border-radius:50%;background:#17151b;box-shadow:inset 0 0 5px #000}.socket.filled{background:radial-gradient(circle,#e4c37d 0 25%,#77552e 50%,#17151b 72%)}
+.skillgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.skillcard{padding:10px;border:1px solid rgba(191,158,107,.22);border-radius:9px;background:rgba(0,0,0,.2)}.skillcard .big{font-size:23px}.skillcard b{font-size:12px;display:block;margin:4px 0}.skillcard p{font-size:10px;color:#a99c8d;margin:0 0 8px;line-height:1.5}
+.node{border:1px solid #8e754e;background:radial-gradient(circle,#6b5336,#201a1b 70%);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:17px;box-shadow:0 0 13px rgba(190,151,86,.15)}
+.toast{position:absolute;z-index:20;left:50%;top:24%;transform:translate(-50%,-10px);background:rgba(17,14,18,.95);border:1px solid #9e8057;border-radius:8px;padding:9px 14px;font-size:11px;color:#ead7b2;opacity:0;pointer-events:none;transition:.2s;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(min-width:700px){#game{max-width:480px;margin:auto;border-left:1px solid #51402d;border-right:1px solid #51402d}.hud{max-width:480px;left:50%;right:auto;width:100%;transform:translateX(-50%)}.drawer{max-width:480px;left:50%;right:auto;width:100%;transform:translate(-50%,105%)}.drawer.open{transform:translate(-50%,0)}.panel-scrim{background:rgba(0,0,0,.38)}}
 </style>
 </head>
-<body><div id="app">
-<header><div class="brand">凡人仙途 <span style="color:var(--gold)">· 無盡秘境</span></div><div class="realm" id="realmBadge">練氣期・一層</div></header>
-<main id="battle"><div id="world" aria-label="遊戲戰鬥畫面"></div>
-<div class="hud"><div class="hudbox"><div class="small">修士生命</div><div class="value" id="hpText">100 / 100</div><div class="bar"><i id="hpBar"></i></div><div class="small" style="margin-top:5px" id="levelText">Lv. 1 · 0 EXP</div></div>
-<div class="hudbox" style="text-align:right"><div class="small" id="mapName">凡人山林・秘境</div><div class="value" id="killText">擊殺 0</div><div class="small" id="effText">效率計算中</div></div></div>
-<div id="bossbar"><div id="bossname">秘境首領</div><div class="bar"><i id="bossHp"></i></div></div><div id="feed">靈氣流轉，正在自動探索秘境……</div><div id="pausehint">自動戰鬥 · 自動施法</div><div id="panel"></div></main>
-<nav><button data-tab="bag"><b>▣</b>背包</button><button data-tab="talent"><b>✧</b>天賦</button><button data-tab="skill"><b>❖</b>技能</button></nav>
+<body>
+<div id="game">
+ <div id="world">
+  <div class="ruin"><svg viewBox="0 0 430 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+   <defs><linearGradient id="stone" x2="0" y2="1"><stop stop-color="#68515a"/><stop offset="1" stop-color="#17151d"/></linearGradient><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#c1786c" stop-opacity=".2"/><stop offset="1" stop-color="#211b27" stop-opacity="0"/></linearGradient></defs>
+   <rect width="430" height="900" fill="url(#sky)"/>
+   <g fill="#17141d" stroke="#80636a" stroke-opacity=".35" stroke-width="2">
+    <path d="M0 0h72v370H0zM12 0h12v270H12zM50 0h9v300h-9zM0 170l35-90 38 90z"/>
+    <path d="M300 0h130v430H300zM316 0h10v315h-10zM400 0h12v350h-12zM300 170l65-130 65 130z"/>
+    <path d="M65 90h38v280H65zM58 95l26-58 26 58zM335 90h28v300h-28zM327 95l22-55 22 55z"/>
+    <path d="M0 350h430v40H0zM0 395l90-26 72 22 85-32 83 24 100-33v160H0z"/>
+   </g>
+   <g fill="none" stroke="#a57b72" stroke-opacity=".24" stroke-width="5"><path d="M80 390V210q0-95 75-95t75 95v180M95 390V220q0-75 60-75t60 75v170"/><path d="M270 390V180q0-70 54-70t54 70v210M284 390V190q0-54 40-54t40 54v200"/></g>
+   <g fill="#dc8c58" opacity=".32"><path d="M34 450q-18-40 0-70 20 32 0 70zM386 430q-17-38 0-67 20 34 0 67z"/></g>
+   <path d="M0 510l70-28 54 15 65-20 62 27 70-22 109 28v390H0z" fill="#18161c"/>
+   <path d="M0 600l90-60 55 34 55-22 70 37 68-42 92 38v315H0z" fill="#252027"/>
+   <path d="M0 710l100-58 80 30 75-44 90 52 85-38v248H0z" fill="#17151b"/>
+   <g stroke="#91776b" stroke-opacity=".22" fill="none" stroke-width="2"><path d="M0 800l95-40 80 25 80-32 90 35 85-22M0 850l130-28 80 19 90-30 130 24M10 670l50-30 20 8M330 680l45-30 45 12"/></g>
+   <g fill="#bc754e" opacity=".25"><circle cx="65" cy="620" r="3"/><circle cx="350" cy="570" r="2"/><circle cx="290" cy="740" r="3"/><circle cx="115" cy="790" r="2"/></g>
+  </svg></div>
+  <canvas id="battle"></canvas><div class="vignette"></div><div id="floating"></div>
+ </div>
+ <div class="topbar"><div class="brand">ASHEN OATH <span style="color:#806a55">/</span> 灰燼誓約</div><div class="stage">第一章 · 腐朽聖庭<strong>Ⅰ — 灰燼庭院</strong></div></div>
+ <div class="bossbar" id="bossbar"><div class="bossname" id="bossname">墮落的守門者</div><div class="bar"><i id="bossfill"></i></div></div>
+ <div class="hud"><div class="hudrow">
+  <div class="orb-wrap"><div class="orb-caption">VITALITY · MANA · WARD</div><div class="orb"><div class="orb-fill" id="hpfill"></div><div class="orb-es"></div><div class="orb-mp"></div><div class="orb-label"><span id="hptext">100%</span><small><span id="mptext">MP 72</span> · <span id="estext">ES 35</span></small></div></div></div>
+  <div class="skills">
+   <button class="skill" title="裂地斬"><span>⚔</span><small>Q</small></button><button class="skill" title="烈焰印記"><span>✹</span><small>W</small></button><button class="skill" title="影步"><span>◈</span><small>E</small></button>
+  </div>
+  <button class="menu-btn" id="menuBtn" aria-label="開啟選單">☷</button>
+ </div></div>
+ <div class="panel-scrim" id="scrim"></div>
+ <section class="drawer" id="drawer" aria-label="角色功能面板">
+  <div class="drawer-head"><div class="drawer-title" id="panelTitle">角色狀態</div><button class="close" id="closeBtn">×</button></div>
+  <nav class="tabs" id="tabs"><button data-tab="character" class="active">角色</button><button data-tab="equipment">裝備</button><button data-tab="inventory">背包</button><button data-tab="skills">技能</button><button data-tab="talents">天賦</button><button data-tab="stage">關卡</button></nav>
+  <div class="panel-content" id="panelContent"></div>
+ </section>
+ <div class="toast" id="toast"></div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/pixi.js@8.10.1/dist/pixi.min.js"></script>
 <script>
 (()=>{
-"use strict";
-const $=id=>document.getElementById(id),world=$("world");
-const realms=[
-{name:"練氣期",start:1,end:13,area:"凡人山林",exp:9,hp:34,atk:4,spawn:1.05},
-{name:"築基期",start:14,end:22,area:"靈脈山谷",exp:27,hp:105,atk:9,spawn:.95},
-{name:"金丹期",start:23,end:31,area:"妖獸秘境",exp:72,hp:300,atk:20,spawn:.9},
-{name:"元嬰期",start:32,end:40,area:"上古遺跡",exp:150,hp:820,atk:42,spawn:.86},
-{name:"化神期",start:41,end:49,area:"天外仙域",exp:290,hp:2100,atk:82,spawn:.82},
-{name:"煉虛期",start:50,end:58,area:"虛空秘境",exp:520,hp:5100,atk:155,spawn:.78},
-{name:"合體期",start:59,end:67,area:"古仙戰場",exp:850,hp:11500,atk:270,spawn:.74},
-{name:"大乘期",start:68,end:76,area:"仙門遺址",exp:1350,hp:24500,atk:440,spawn:.7},
-{name:"渡劫期",start:77,end:100,area:"天劫之地",exp:2100,hp:52000,atk:700,spawn:.66}
-];
-const state={level:1,xp:0,xpNeed:90,hp:100,maxHp:100,atk:12,def:2,attackSpeed:1,castSpeed:1,moveSpeed:1,crit:5,lifeSteal:0,skills:["劍氣斬"],talents:[],inventory:[],kills:0,totalXp:0,lastStat:Date.now(),recentKills:0,expPerHour:0,activeTab:null,spawnAt:0,attackAt:0,skillTimers:{},player:{x:0,y:0,angle:0,moving:false,anim:0,swing:0},enemies:[],effects:[],projectiles:[],boss:null};
-const skillDefs=[
-{name:"劍氣斬",desc:"每 2.4 秒自動斬出劍氣，造成 180% 攻擊傷害。",cd:2.4},
-{name:"雷球術",desc:"每 6 秒自動釋放雷球，最多連鎖 4 個敵人。",cd:6},
-{name:"護體靈盾",desc:"生命低於 45% 時自動恢復 18% 最大生命，冷卻 18 秒。",cd:18},
-{name:"吸靈訣",desc:"擊殺敵人時額外恢復生命。",cd:0},
-{name:"飛劍追擊",desc:"每 3.8 秒追加飛劍攻擊。",cd:3.8},
-{name:"雷身共鳴",desc:"雷系傷害提高，雷擊有機率再次觸發。",cd:0}
-];
-const talentDefs=[
-{name:"淬體",desc:"最大生命 +12%。",apply:s=>s.maxHp*=1.12},
-{name:"御劍",desc:"攻擊速度 +10%。",apply:s=>s.attackSpeed*=1.1},
-{name:"靈脈",desc:"施法速度 +12%。",apply:s=>s.castSpeed*=1.12},
-{name:"疾行",desc:"移動速度 +12%。",apply:s=>s.moveSpeed*=1.12},
-{name:"洞察",desc:"暴擊率 +5%。",apply:s=>s.crit+=5},
-{name:"貪狼",desc:"擊殺恢復 2% 最大生命。",apply:s=>s.lifeSteal+=.02}
-];
-const gearPool=[
-{name:"青鋒短劍",slot:"weapon",rarity:"common",desc:"攻擊力 +5",atk:5},
-{name:"靈木法杖",slot:"weapon",rarity:"rare",desc:"攻擊力 +8、施法速度 +8%",atk:8,cast:1.08},
-{name:"雷紋劍胚",slot:"weapon",rarity:"epic",desc:"攻擊力 +12，攻擊命中有機率追加雷擊。",atk:12,proc:"雷擊"},
-{name:"玄鐵護腕",slot:"head",rarity:"common",desc:"防禦 +3、生命 +15",def:3,hp:15},
-{name:"青藤靈衣",slot:"body",rarity:"rare",desc:"防禦 +5、生命 +35",def:5,hp:35},
-{name:"噬靈戒",slot:"ring",rarity:"epic",desc:"攻擊力 +4，擊殺恢復生命。",atk:4,life:.03},
-{name:"分光劍匣",slot:"weapon",rarity:"legend",desc:"攻擊力 +18，劍氣可追加飛劍。",atk:18,proc:"分光"},
-{name:"雷紋護符",slot:"ring",rarity:"legend",desc:"攻擊力 +9，雷擊可額外連鎖。",atk:9,proc:"雷鏈"}
-];
-let W=0,H=0,last=0,app=null,worldLayer=null,spriteLayer=null,glowLayer=null,fxLayer=null,artTextures={},spriteNodes=new Map(),playerSprite=null,playerBaseScaleX=1,playerBaseScaleY=1;
-const particlePool=[];const floatingTexts=[];
-class ParticleEmitter{
- constructor(){this.items=[]}
- emit(x,y,color,count=8,power=70){for(let i=0;i<count;i++){const a=Math.random()*Math.PI*2,v=power*(.25+Math.random()*.75);this.items.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:.35+Math.random()*.35,max:.7,color,size:1.5+Math.random()*3})}}
- update(dt){this.items=this.items.filter(p=>{p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.96;p.vy*=.96;return p.life>0})}
- draw(g){for(const p of this.items){g.circle(p.x,p.y,p.size*Math.max(.2,p.life/p.max)).fill({color:p.color,alpha:Math.min(1,p.life/p.max)})}}
+'use strict';
+const $=id=>document.getElementById(id), canvas=$('battle'),ctx=canvas.getContext('2d');
+const state={level:1,x:0,y:0,hp:100,maxHp:100,mp:72,maxMp:72,es:35,maxEs:35,xp:0,nextXp:80,gold:0,kills:0,stage:1,job:'warden',drawer:false,tab:'character',talent:0,inventory:[],gear:{weapon:null,helm:null,chest:null,gloves:null,boots:null,ring:null},lastSave:Date.now(),boss:null,lootFilter:'rare',skillTimers:{},enemies:[],particles:[],floaters:[],lastTime:0,spawn:0,attack:0,autoLoot:true};
+const jobs={warden:{name:'誓約守衛',icon:'⚔',desc:'近戰重裝，以穩定斬擊與護盾碾碎敵人',damage:17,range:62,speed:1.0,skills:['裂地斬','鐵壁姿態','審判之刃']},arcanist:{name:'暮星術士',icon:'✦',desc:'遠程元素法術，擅長連鎖與範圍爆發',damage:13,range:205,speed:1.08,skills:['星火彈','霜環','雷霆鏈']},reaper:{name:'墓園行者',icon:'☠',desc:'敏捷收割者，以影刃與靈魂汲取維持戰線',damage:14,range:105,speed:1.22,skills:['影襲','魂裂','幽步']}}
+const skillBook=[['裂地斬','⚔','向前斬出一道沉重劍氣，對近距離敵人造成傷害。'],['烈焰印記','✹','在敵群中引爆灼熱印記，造成範圍傷害。'],['影步','◈','瞬間突進並獲得短暫護盾。'],['鐵壁姿態','▣','短時間提高能量護盾回復。'],['星火彈','✦','射出灼熱星火，命中後迸裂。'],['霜環','❄','凍結周圍敵人並造成範圍傷害。'],['雷霆鏈','ϟ','閃電在多個目標間跳躍。'],['影襲','♠','高速突刺，對孤立目標造成額外傷害。']];
+const gearNames=['武器','頭盔','胸甲','手套','靴子','戒指'],gearKeys=['weapon','helm','chest','gloves','boots','ring'];
+const names=['腐化侍從','裂爪獵犬','灰燼行刑者','聖庭看守','墮落的守門者'];
+const gemPool=[['鋒銳寶石','◆','增加技能傷害'],['迅捷寶石','◇','增加攻擊速度'],['灼熱寶石','✦','附加火焰傷害'],['汲魂寶石','◉','造成傷害時恢復生命'],['擴張寶石','✧','增加技能範圍']];
+let W=0,H=0,dpr=1,elapsed=0;
+function resize(){const r=canvas.getBoundingClientRect();dpr=Math.min(devicePixelRatio||1,2);W=r.width;H=r.height;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);if(!state.x){state.x=W*.5;state.y=H*.66}}
+addEventListener('resize',resize);resize();
+function rand(a,b){return a+Math.random()*(b-a)}
+function enemySpawn(boss=false){const edge=Math.random()<.5?-1:1;const e={id:Math.random(),type:boss?'boss':Math.random()<.18?'elite':'normal',name:boss?names[4]:names[Math.floor(Math.random()*4)],x:rand(W*.22,W*.78),y:rand(H*.34,H*.59),hp:boss?560:Math.round(rand(40,70)),max:boss?560:70,spd:boss?12:rand(18,29),atk:boss?14:rand(5,9),size:boss?48:Math.random()<.18?29:22,phase:rand(0,6),attack:rand(1,3),hit:0};state.enemies.push(e);if(boss){state.boss=e;$('bossbar').classList.add('show');$('bossname').textContent=e.name}}
+function spawnFloat(x,y,text,type='hit'){const el=document.createElement('div');el.className='float '+type;el.textContent=text;el.style.left=x+'px';el.style.top=y+'px';$('floating').appendChild(el);setTimeout(()=>el.remove(),950)}
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),1800)}
+function drop(e){const roll=Math.random();if(roll<.15){const gem=gemPool[Math.floor(Math.random()*gemPool.length)];state.inventory.push({kind:'gem',name:gem[0],icon:gem[1],desc:gem[2],rarity:'rare',sockets:0});spawnFloat(e.x,e.y-20,'寶石掉落','loot')}else if(roll<.72){const rarity=roll<.27?'legend':roll<.46?'epic':'rare';const slot=Math.floor(Math.random()*6);const item={kind:'gear',name:(rarity==='legend'?'古老的 ':'')+['裂界','餘燼','暮光','審判','幽影'][Math.floor(Math.random()*5)]+gearNames[slot],slot:gearKeys[slot],icon:['⚔','♜','▣','♢','⌁','◉'][slot],rarity,level:state.level,damage:Math.round(rand(4,13)+state.level*1.8),sockets:Math.floor(Math.random()*4),desc:rarity==='legend'?'傳奇：技能命中時有機率引發餘燼爆裂':'裝備詞綴：提升角色戰鬥能力'};state.inventory.push(item);spawnFloat(e.x,e.y-20,rarity==='legend'?'傳奇裝備！':'裝備掉落', 'loot')}else{state.gold+=Math.round(rand(4,12));spawnFloat(e.x,e.y-20,'+'+Math.round(rand(4,12))+' 金幣','loot')}}
+function kill(e){state.kills++;state.xp+=e.type==='boss'?120:e.type==='elite'?28:12;drop(e);if(state.xp>=state.nextXp){state.xp-=state.nextXp;state.level++;state.nextXp=Math.round(state.nextXp*1.28);state.maxHp+=9;state.hp=state.maxHp;state.maxMp+=4;state.mp=state.maxMp;state.talent++;toast('角色升級！獲得 1 點天賦點')}if(e.type==='boss'){state.boss=null;$('bossbar').classList.remove('show');toast('章節首領已擊敗！')}save()}
+function damageEnemy(e,n){e.hp-=n;e.hit=.16;spawnFloat(e.x,e.y-e.size,n.toString(),'hit');if(e.hp<=0){state.enemies=state.enemies.filter(x=>x!==e);kill(e)}}
+function drawHero(x,y,t){ctx.save();ctx.translate(x,y);const bob=Math.sin(t*5)*2;ctx.translate(0,bob);
+ // shadow
+ ctx.fillStyle='rgba(0,0,0,.55)';ctx.beginPath();ctx.ellipse(0,8,27,9,0,0,Math.PI*2);ctx.fill();
+ // cloak
+ let g=ctx.createLinearGradient(-18,-25,20,15);g.addColorStop(0,'#80605b');g.addColorStop(.45,'#392c34');g.addColorStop(1,'#17151d');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(-13,-33);ctx.quadraticCurveTo(-26,-8,-21,5);ctx.lineTo(19,5);ctx.quadraticCurveTo(23,-10,12,-34);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='#b08b5d';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(-13,-25);ctx.lineTo(-18,1);ctx.moveTo(12,-25);ctx.lineTo(18,1);ctx.stroke();
+ // armor chest
+ ctx.fillStyle='#6c5550';ctx.beginPath();ctx.moveTo(-12,-31);ctx.lineTo(-8,-40);ctx.lineTo(8,-40);ctx.lineTo(13,-30);ctx.lineTo(10,-12);ctx.lineTo(-10,-12);ctx.closePath();ctx.fill();ctx.strokeStyle='#c2a16e';ctx.lineWidth=1.2;ctx.stroke();
+ ctx.fillStyle='#b69b72';ctx.fillRect(-2,-37,4,19);ctx.fillStyle='#382d32';ctx.fillRect(-8,-25,16,3);
+ // shoulder plates
+ ctx.fillStyle='#a38a69';ctx.beginPath();ctx.moveTo(-16,-34);ctx.lineTo(-11,-42);ctx.lineTo(-5,-36);ctx.lineTo(-8,-29);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(16,-34);ctx.lineTo(11,-42);ctx.lineTo(5,-36);ctx.lineTo(8,-29);ctx.closePath();ctx.fill();
+ // head and hood
+ ctx.fillStyle='#211c24';ctx.beginPath();ctx.moveTo(-10,-40);ctx.quadraticCurveTo(-14,-61,0,-64);ctx.quadraticCurveTo(15,-59,10,-39);ctx.lineTo(7,-34);ctx.lineTo(-8,-34);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#b89570';ctx.beginPath();ctx.ellipse(0,-48,7,9,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#2b2026';ctx.fillRect(-6,-49,12,4);ctx.fillStyle='#d6b36d';ctx.fillRect(-4,-47,3,1.5);ctx.fillRect(2,-47,3,1.5);
+ // legs
+ ctx.strokeStyle='#29242a';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(-7,-12);ctx.lineTo(-9,2);ctx.moveTo(7,-12);ctx.lineTo(9,2);ctx.stroke();
+ // blade
+ ctx.save();ctx.translate(18,-28);ctx.rotate(-.38+Math.sin(t*4)*.08);ctx.fillStyle='#b8b6ad';ctx.beginPath();ctx.moveTo(-2,0);ctx.lineTo(1,-31);ctx.lineTo(5,-36);ctx.lineTo(4,-2);ctx.closePath();ctx.fill();ctx.fillStyle='#d7b67c';ctx.fillRect(-5,-2,12,3);ctx.fillStyle='#5c4033';ctx.fillRect(0,1,3,12);ctx.restore();
+ ctx.restore()}
+function drawEnemy(e,t){ctx.save();ctx.translate(e.x,e.y+Math.sin(t*3+e.phase)*2);const s=e.size/25;ctx.scale(s,s);if(e.hit>0){ctx.globalAlpha=1;ctx.shadowColor='#e9c5a0';ctx.shadowBlur=18}
+ ctx.fillStyle='rgba(0,0,0,.55)';ctx.beginPath();ctx.ellipse(0,5,23,7,0,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+ if(e.type==='boss'){ctx.fillStyle='#29202c';ctx.beginPath();ctx.moveTo(-18,-34);ctx.lineTo(-28,-58);ctx.lineTo(-10,-46);ctx.lineTo(0,-67);ctx.lineTo(10,-46);ctx.lineTo(28,-58);ctx.lineTo(18,-32);ctx.lineTo(21,0);ctx.lineTo(-21,0);ctx.closePath();ctx.fill();ctx.strokeStyle='#b65b51';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#8e333a';ctx.fillRect(-14,-33,28,28);ctx.fillStyle='#e8b76e';ctx.fillRect(-10,-42,7,3);ctx.fillRect(4,-42,7,3);ctx.strokeStyle='#d4a66b';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(17,-25);ctx.lineTo(36,-55);ctx.stroke()}
+ else{ctx.fillStyle=e.type==='elite'?'#59404a':'#38313a';ctx.beginPath();ctx.moveTo(-15,-18);ctx.lineTo(-21,-34);ctx.lineTo(-9,-28);ctx.lineTo(-4,-41);ctx.lineTo(5,-28);ctx.lineTo(17,-35);ctx.lineTo(14,-16);ctx.lineTo(18,2);ctx.lineTo(-17,2);ctx.closePath();ctx.fill();ctx.strokeStyle=e.type==='elite'?'#c58b61':'#88717a';ctx.lineWidth=1.4;ctx.stroke();ctx.fillStyle='#a74b48';ctx.fillRect(-10,-21,5,3);ctx.fillRect(5,-21,5,3);ctx.strokeStyle='#4b343d';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-11,-8);ctx.lineTo(-22,1);ctx.moveTo(11,-8);ctx.lineTo(21,1);ctx.stroke();if(e.type==='elite'){ctx.strokeStyle='#d0a16a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-17,23,Math.PI,Math.PI*2);ctx.stroke()}}
+ ctx.restore();
+ // health bar
+ if(e.hp<e.max){ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(e.x-19,e.y-e.size-12,38,3);ctx.fillStyle=e.type==='boss'?'#c55b55':'#a64a4a';ctx.fillRect(e.x-19,e.y-e.size-12,38*Math.max(0,e.hp/e.max),3)}
 }
-const particles=new ParticleEmitter();
-async function setupRenderer(){
- if(!window.PIXI){feed("渲染引擎載入失敗，請確認網路連線後重新整理。");return false}
- app=new PIXI.Application();
- await app.init({resizeTo:world,background:"#17231f",antialias:true,resolution:Math.min(window.devicePixelRatio||1,2),autoDensity:true,powerPreference:"high-performance",autoStart:false,sharedTicker:false});
- world.replaceChildren(app.canvas);app.canvas.style.width="100%";app.canvas.style.height="100%";app.canvas.style.display="block";
- worldLayer=new PIXI.Graphics();spriteLayer=new PIXI.Container();glowLayer=new PIXI.Graphics();fxLayer=new PIXI.Graphics();
- app.stage.addChild(worldLayer,spriteLayer,glowLayer,fxLayer);
- try{glowLayer.filters=[new PIXI.BlurFilter({strength:4,quality:2})];glowLayer.blendMode="add"}catch(e){console.warn("Glow filter fallback",e)}
- const art={
- player:`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="112" viewBox="0 0 96 112"><defs><linearGradient id="r" x2="1" y2="1"><stop stop-color="#d9e8ee"/><stop offset=".48" stop-color="#668ca8"/><stop offset="1" stop-color="#263b5d"/></linearGradient><linearGradient id="g"><stop stop-color="#fff0b2"/><stop offset="1" stop-color="#b8893d"/></linearGradient></defs><ellipse cx="48" cy="102" rx="26" ry="6" fill="#08121b" opacity=".55"/><path d="M29 43 15 91 42 82 49 105 57 82 82 92 67 43Z" fill="url(#r)" stroke="#d3c18a" stroke-width="2"/><path d="m31 48 17 18 18-18 8 38-26-10-24 10Z" fill="#1c3049" stroke="#a8c5d0" stroke-width="2"/><path d="M34 42 48 14 64 42 57 57 48 52 39 58Z" fill="#d9e5e6" stroke="#c7a969" stroke-width="2"/><path d="m34 25 14-17 17 17-7 10H40Z" fill="#243d59" stroke="#e7ca83" stroke-width="3"/><path d="M43 27h10l-5 9Z" fill="#73d4e4"/><path d="M68 49 88 21" stroke="url(#g)" stroke-width="4" stroke-linecap="round"/><path d="m83 18 8-9 1 14" fill="#f7dc91" stroke="#fff0b8" stroke-width="2"/><path d="m26 52-8 28 13-6" fill="#9ebdc9"/><path d="M39 65 48 77 58 65" fill="none" stroke="#e8d39c" stroke-width="2"/></svg>`,
- wolf:`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="88" viewBox="0 0 96 88"><defs><linearGradient id="m" x2="1" y2="1"><stop stop-color="#a6b98a"/><stop offset="1" stop-color="#405d48"/></linearGradient></defs><ellipse cx="48" cy="79" rx="32" ry="5" fill="#07110d" opacity=".55"/><path d="M18 54 8 34 25 39 31 17 44 31 59 22 65 39 84 35 76 58 59 69 29 68Z" fill="url(#m)" stroke="#233c2d" stroke-width="3"/><path d="m27 42-8-22 17 14M58 36 72 16 75 41" fill="#758f69" stroke="#d0d2a0" stroke-width="3"/><path d="m35 47 12-7 17 6-9 17-18-2Z" fill="#273e30"/><path d="m39 49 5-2m13 0 5 2" stroke="#f3d58a" stroke-width="4" stroke-linecap="round"/><path d="m45 59 7 4 6-5" fill="#d9d0b2"/><path d="m29 64-5 15m31-12 4 12m15-22 8 12" stroke="#d0c39b" stroke-width="5" stroke-linecap="round"/></svg>`,
- golem:`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"><defs><linearGradient id="s" x2="1" y2="1"><stop stop-color="#b1a98b"/><stop offset="1" stop-color="#4c5148"/></linearGradient></defs><ellipse cx="48" cy="87" rx="34" ry="6" fill="#07110d" opacity=".6"/><path d="m17 42 12-22 17 7 12-13 19 20 4 23-12 24-20 8-23-9-13-20Z" fill="url(#s)" stroke="#343e36" stroke-width="3"/><path d="m27 40 14-13 9 12-7 13-18 1Zm29-8 13-7 9 17-12 8-10-7Z" fill="#777e70" stroke="#c0b99b" stroke-width="2"/><path d="m31 57 13-8 8 9-6 17-18-5Zm28 1 14-8 4 17-15 10-9-8Z" fill="#626b5d"/><path d="m38 43 7 3m13-4 7-2" stroke="#ffc36a" stroke-width="4" stroke-linecap="round"/><path d="m47 53 6 5 7-5" fill="none" stroke="#e7a35b" stroke-width="3"/><path d="m17 47-8 14 16 4m54-17 11 13-15 7" fill="#858a77" stroke="#414b40" stroke-width="3"/></svg>`,
- wraith:`<svg xmlns="http://www.w3.org/2000/svg" width="88" height="100" viewBox="0 0 88 100"><defs><linearGradient id="w" x2="0" y2="1"><stop stop-color="#b7e8e9" stop-opacity=".95"/><stop offset="1" stop-color="#397c91" stop-opacity=".35"/></linearGradient></defs><ellipse cx="44" cy="91" rx="24" ry="5" fill="#07121a" opacity=".45"/><path d="M44 9 60 18 68 39 62 63 77 82 60 77 47 91 34 78 13 85 27 62 20 39 28 18Z" fill="url(#w)" stroke="#9bd8df" stroke-width="2"/><path d="M28 24 44 5 60 24 54 42 34 42Z" fill="#183d55" stroke="#b6dce1" stroke-width="2"/><path d="m35 31 5 2m9 0 5-2" stroke="#b9f8ff" stroke-width="4" stroke-linecap="round"/><path d="m37 44 7 6 8-6" fill="none" stroke="#c7f3ed" stroke-width="2"/><path d="M20 51 9 65m52-13 15 12" stroke="#8bd4df" stroke-width="5" stroke-linecap="round"/><path d="M44 14v-9m-8 12-7-7m23 7 8-7" stroke="#d6eff0" stroke-width="2"/></svg>`
- };
- for(const [key,svg] of Object.entries(art)){const uri="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);artTextures[key]=await PIXI.Assets.load(uri)}
- playerSprite=new PIXI.Sprite(artTextures.player);playerSprite.anchor.set(.5,.62);playerSprite.width=30;playerSprite.height=36;playerBaseScaleX=playerSprite.scale.x;playerBaseScaleY=playerSprite.scale.y;spriteLayer.addChild(playerSprite);
- try{glowLayer.filters=[new PIXI.BlurFilter({strength:4,quality:2})];glowLayer.blendMode="add"}catch(e){console.warn("Glow filter fallback",e)}
- resize();return true
+function draw(){ctx.clearRect(0,0,W,H);const t=elapsed;
+ // ground mist and embers
+ for(let i=0;i<14;i++){let x=(i*97+t*7)%W,y=H*.37+(i*53% (H*.42));ctx.fillStyle='rgba(218,126,83,'+(.025+((i%3)*.012))+')';ctx.beginPath();ctx.arc(x,y,1.2+(i%2),0,Math.PI*2);ctx.fill()}
+ // subtle floor perspective
+ ctx.strokeStyle='rgba(190,148,118,.075)';ctx.lineWidth=1;for(let i=0;i<7;i++){let y=H*.58+i*i*9;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y+5);ctx.stroke()}
+ state.enemies.forEach(e=>drawEnemy(e,t));drawHero(state.x,state.y,t);
+ state.particles=state.particles.filter(p=>p.life>0);for(const p of state.particles){p.life-=.03;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;
 }
-function resize(){if(!world)return;const r=world.getBoundingClientRect();W=r.width;H=r.height;if(!state.player.x){state.player.x=W/2;state.player.y=H/2}}
-window.addEventListener("resize",resize);
-function realmIndex(l=state.level){return Math.max(0,realms.findIndex(r=>l>=r.start&&l<=r.end))}
-function realm(){return realms[realmIndex()]}
-function realmStage(){const i=realmIndex(),r=realms[i],n=state.level-r.start+1;if(i===0)return "練氣"+["一","二","三","四","五","六","七","八","九","十","十一","十二","十三"][n-1]+"層";return ["初期","中期","後期","圓滿"][Math.min(3,Math.floor((n-1)/Math.max(1,Math.ceil((r.end-r.start+1)/4))))]}
-function feed(t){$("feed").textContent=t}
-function recalc(){let s={maxHp:100+Math.max(0,state.level-1)*8,atk:12+Math.max(0,state.level-1)*1.5,def:2,attackSpeed:1,castSpeed:1,moveSpeed:1,crit:5,lifeSteal:0};state.inventory.filter(g=>g.equipped).forEach(g=>{s.atk+=g.atk||0;s.def+=g.def||0;s.maxHp+=g.hp||0;s.castSpeed*=g.cast||1;s.lifeSteal+=g.life||0});state.talents.forEach(i=>talentDefs[i]?.apply(s));state.maxHp=s.maxHp;state.atk=s.atk;state.def=s.def;state.attackSpeed=s.attackSpeed;state.castSpeed=s.castSpeed;state.moveSpeed=s.moveSpeed;state.crit=s.crit;state.lifeSteal=s.lifeSteal;state.hp=Math.min(state.hp,state.maxHp)}
-function xpNeed(level){return Math.round(90*Math.pow(1.105,level-1)*(level<14?1:level<23?1.15:level<32?1.25:1.4))}
-function updateHud(){const r=realm();$("realmBadge").textContent=r.name+"・"+realmStage();$("mapName").textContent=r.area+"・秘境";$("hpText").textContent=Math.max(0,Math.ceil(state.hp))+" / "+Math.ceil(state.maxHp);$("hpBar").style.width=Math.max(0,state.hp/state.maxHp*100)+"%";$("levelText").textContent="Lv. "+state.level+" · "+Math.floor(state.xp)+" / "+state.xpNeed+" EXP";$("killText").textContent="擊殺 "+state.kills;$("effText").textContent=Math.round(state.expPerHour).toLocaleString()+" EXP／時"}
-function levelUp(){while(state.xp>=state.xpNeed&&state.level<100){state.xp-=state.xpNeed;state.level++;state.xpNeed=xpNeed(state.level);recalc();state.hp=Math.min(state.maxHp,state.hp+20);if([13,22,31,40,49,58,67,76].includes(state.level-1))feed("修為抵達境界瓶頸！此版本先展示境界進度，突破試煉待後續開發。");else feed("修為精進！突破至 "+state.level+" 等。")}if(state.level>=100)state.xp=0;recalc();updateHud()}
-function addXp(n){if(state.level>=100)return;state.xp+=n;state.totalXp+=n;levelUp()}
-function dropGear(){const g={...gearPool[Math.floor(Math.random()*gearPool.length)],id:Math.random().toString(36).slice(2),equipped:false};state.inventory.unshift(g);if(state.inventory.length>80)state.inventory.pop();feed("獲得 "+g.name+"！");if(state.activeTab==="bag")renderPanel()}
-function equip(g){state.inventory.forEach(x=>{if(x.slot===g.slot)x.equipped=false});g.equipped=true;recalc();feed("已裝備："+g.name);renderPanel();updateHud()}
-function spawnEnemy(){const r=realm(),a=Math.random()*Math.PI*2,d=Math.max(W,H)*(.48+Math.random()*.18),boss=state.kills>0&&state.kills%80===0&&!state.boss,m=1+realmIndex()*.48,e={x:Math.max(15,Math.min(W-15,state.player.x+Math.cos(a)*d)),y:Math.max(85,Math.min(H-30,state.player.y+Math.sin(a)*d)),hp:r.hp*m*(boss?12:1),max:r.hp*m*(boss?12:1),atk:r.atk*m,boss,type:boss?"golem":["wolf","golem","wraith"][Math.floor(Math.random()*3)],hit:0};if(boss){state.boss=e;$("bossbar").style.display="block";$("bossname").textContent="秘境首領・山魈王"}state.enemies.push(e)}
-function nearest(){let best=null,bd=Infinity;for(const e of state.enemies){const d=Math.hypot(e.x-state.player.x,e.y-state.player.y);if(d<bd){bd=d;best=e}}return best}
-function damage(e,n,color="#f4d18a"){if(!state.enemies.includes(e))return;e.hp-=n;e.hit=.15;particles.emit(e.x,e.y,color,7,85);state.effects.push({x:e.x,y:e.y-12,text:"-"+Math.round(n),life:.7,color});if(app){const label=new PIXI.Text({text:"-"+Math.round(n),style:{fontFamily:"Arial",fontSize:13,fontWeight:"bold",fill:color,stroke:{color:"#10151d",width:3}}});label.anchor.set(.5);label.x=e.x;label.y=e.y-18;app.stage.addChild(label);floatingTexts.push({node:label,life:.72,max:.72})}if(e.hp<=0)kill(e)}
-function kill(e){const idx=state.enemies.indexOf(e);if(idx<0)return;particles.emit(e.x,e.y,e.type==="wraith"?"#9deaff":e.type==="golem"?"#d5b47a":"#b7d89b",22,145);state.effects.push({x:e.x,y:e.y,text:"",life:.42,color:e.type==="wraith"?"#9deaff":"#d7c28d",ring:true});state.enemies.splice(idx,1);if(e.boss){state.boss=null;$("bossbar").style.display="none";feed("擊敗秘境首領！獲得額外獎勵。");dropGear();dropGear()}state.kills++;state.recentKills++;addXp(realm().exp*(e.boss?15:1));if(Math.random()<.12||e.boss)dropGear();if(state.lifeSteal>0)state.hp=Math.min(state.maxHp,state.hp+state.maxHp*state.lifeSteal);if(state.skills.includes("吸靈訣"))state.hp=Math.min(state.maxHp,state.hp+2)}
-function playerAttack(t){state.player.swing=.22;particles.emit(state.player.x,state.player.y,"#a9d8ff",9,90);const d=state.atk*(Math.random()*100<state.crit?2:1);damage(t,d);state.effects.push({x:(state.player.x+t.x)/2,y:(state.player.y+t.y)/2,text:"✦",life:.22,color:"#a9d8ff"});if(state.inventory.some(g=>g.equipped&&g.proc==="雷擊")&&Math.random()<.22)damage(t,state.atk*.8,"#8fdcff");if(state.inventory.some(g=>g.equipped&&g.proc==="分光")){const other=state.enemies.find(e=>e!==t&&Math.hypot(e.x-t.x,e.y-t.y)<120);if(other)damage(other,state.atk*.55,"#a9d8ff")}}
-function visualProjectile(target,color="#a9d8ff",speed=430,size=5){if(!target)return;state.projectiles.push({x:state.player.x,y:state.player.y,target,color,speed,size,life:1.8})}
-function castSkills(t,now){if(!t)return;const active=(name,cd,fn)=>{if(state.skills.includes(name)&&now-(state.skillTimers[name]||0)>cd*1000/state.castSpeed){state.skillTimers[name]=now;fn()}};active("劍氣斬",2.4,()=>{visualProjectile(t,"#a9d8ff",520,7);damage(t,state.atk*1.8,"#a9d8ff");state.effects.push({x:t.x,y:t.y,text:"劍氣",life:.5,color:"#b7e2ff"})});active("雷球術",6,()=>{state.enemies.slice(0,4).forEach((e,i)=>{visualProjectile(e,"#a78bfa",620,6);damage(e,state.atk*1.25*(1-i*.12),"#8fdcff")});feed("雷球術引發連鎖雷擊！")});active("飛劍追擊",3.8,()=>{visualProjectile(t,"#d9eaff",700,4);damage(t,state.atk*1.1,"#b7e2ff")});active("護體靈盾",18,()=>{if(state.hp<state.maxHp*.45){state.hp=Math.min(state.maxHp,state.hp+state.maxHp*.18);feed("護體靈盾自動恢復氣血。")}else state.skillTimers["護體靈盾"]=now-17000})}
-function step(dt,now){const p=state.player,t=nearest();
- state.player.swing=Math.max(0,state.player.swing-dt);state.projectiles=state.projectiles.filter(q=>{q.life-=dt;if(!state.enemies.includes(q.target))return false;const dx=q.target.x-q.x,dy=q.target.y-q.y,d=Math.hypot(dx,dy)||1,move=Math.min(d,q.speed*dt);q.x+=dx/d*move;q.y+=dy/d*move;return q.life>0&&d>7});
- for(const f of floatingTexts){f.life-=dt;f.node.y-=dt*24;f.node.alpha=Math.max(0,f.life/f.max)}for(let i=floatingTexts.length-1;i>=0;i--)if(floatingTexts[i].life<=0){app?.stage.removeChild(floatingTexts[i].node);floatingTexts[i].node.destroy();floatingTexts.splice(i,1)}if(!state.boss&&state.enemies.length<12&&now-state.spawnAt>realm().spawn*1000){spawnEnemy();state.spawnAt=now}if(t){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy)||1;p.angle=Math.atan2(dy,dx);p.moving=d>42;if(d>42){p.anim+=dt*11;p.x+=dx/d*state.moveSpeed*55*dt;p.y+=dy/d*state.moveSpeed*55*dt;p.x=Math.max(12,Math.min(W-12,p.x));p.y=Math.max(80,Math.min(H-12,p.y))}else if(now-state.attackAt>720/state.attackSpeed){state.attackAt=now;playerAttack(t)}castSkills(t,now)}for(const e of [...state.enemies]){const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;if(d>35){e.anim=(e.anim||0)+dt*8;e.facing=dx<0?-1:1;e.x+=dx/d*18*dt;e.y+=dy/d*18*dt}else if(now-(e.lastHit||0)>1200){e.lastHit=now;state.hp-=Math.max(1,e.atk-state.def);state.effects.push({x:p.x,y:p.y-18,text:"受擊",life:.5,color:"#ff9999"});if(state.hp<=0){state.hp=state.maxHp*.55;state.enemies=[];feed("修士重傷，靈力護持後撤回秘境入口。")}}if(e.boss)$("bossHp").style.width=Math.max(0,e.hp/e.max*100)+"%"}state.effects=state.effects.filter(f=>{f.life-=dt;return f.life>0});state.enemies.forEach(e=>e.hit=Math.max(0,e.hit-dt));if(now-state.lastStat>5000){state.expPerHour=state.recentKills*realm().exp*720;state.recentKills=0;state.lastStat=now;updateHud()}}
-function draw(dt=0){
- if(!app||!worldLayer)return;
- const g=worldLayer,gl=glowLayer,fx=fxLayer;g.clear();gl.clear();fx.clear();
- g.rect(0,0,W,H).fill("#17231f");
- // Layered forest-floor texture, scattered stones and ancient moss.
- for(let i=0;i<46;i++){const x=(i*137+31)%Math.max(1,W),y=(i*173+63)%Math.max(1,H);g.ellipse(x,y,20+(i%5)*7,9+(i%3)*5).fill({color:i%2?"#263a31":"#304237",alpha:.28});if(i%3===0){g.circle(x+13,y-5,2).fill({color:"#788d67",alpha:.42});g.moveTo(x-8,y+3).lineTo(x+3,y+1).stroke({color:"#52654d",alpha:.3,width:2})}}
- for(let x=0;x<W;x+=76)g.moveTo(x,0).lineTo(x,H).stroke({color:"#52614b",alpha:.10,width:1});
- for(let y=0;y<H;y+=76)g.moveTo(0,y).lineTo(W,y).stroke({color:"#52614b",alpha:.10,width:1});
- // Broken flagstones and ancient roots create a readable forest path.
- for(let i=0;i<9;i++){const x=(i*91+27)%Math.max(1,W),y=(i*157+130)%Math.max(1,H);g.roundRect(x,y,24+(i%3)*9,10+(i%2)*5,3).fill({color:"#596052",alpha:.24});g.moveTo(x+4,y+3).lineTo(x+13,y+6).stroke({color:"#9b987d",alpha:.18,width:1})}
- for(let i=0;i<7;i++){const x=(i*149+68)%Math.max(1,W),y=(i*211+210)%Math.max(1,H);g.moveTo(x-24,y+16).bezierCurveTo(x-6,y-2,x+8,y+7,x+25,y-18).stroke({color:"#536247",alpha:.45,width:3});g.moveTo(x-15,y+10).lineTo(x-27,y-1).stroke({color:"#536247",alpha:.34,width:2})}
- for(let i=0;i<5;i++){const x=(i*181+85)%Math.max(1,W),y=(i*233+90)%Math.max(1,H);g.ellipse(x,y,14,6).fill({color:"#17231c",alpha:.7});g.circle(x,y-4,4).fill({color:i%2?"#8d9c72":"#a0a27a",alpha:.75});g.circle(x,y-5,1.3).fill({color:"#d5d2a0",alpha:.7})}
- for(let i=0;i<24;i++){const x=(i*113+47)%Math.max(1,W),y=(i*191+91)%Math.max(1,H);g.circle(x,y,1.5).fill({color:"#b5d59b",alpha:.38})}
- const alive=new Set();
- for(const e of state.enemies){
-   alive.add(e);
-   let node=spriteNodes.get(e);
-   if(!node){node=new PIXI.Sprite(artTextures[e.type]||artTextures.wolf);node.anchor.set(.5,.65);node.width=e.boss?40:26;node.height=e.boss?43:29;node._baseScaleX=node.scale.x;node._baseScaleY=node.scale.y;spriteLayer.addChild(node);spriteNodes.set(e,node)}
-   node.x=e.x;node.y=e.y+Math.sin((e.anim||0))*2.2;node.scale.set(node._baseScaleX*(e.facing===-1?-1:1),node._baseScaleY*(1+Math.sin((e.anim||0)*2)*.012));node.alpha=e.hit>0?1:.96;node.tint=e.hit>0?0xffffff:0xffffff;node.x+=e.hit>0?Math.sin(performance.now()*.09)*1.5:0;
-   if(e.hp<e.max){g.roundRect(e.x-12,e.y-23,24,3,1.5).fill("#321e25");g.roundRect(e.x-12,e.y-23,24*Math.max(0,e.hp/e.max),3,1.5).fill("#d76b69")}
-   if(e.boss)gl.circle(e.x,e.y-5,25).fill({color:"#df6674",alpha:.20});
- }
- for(const [e,node] of spriteNodes){if(!alive.has(e)){spriteLayer.removeChild(node);node.destroy();spriteNodes.delete(e)}}
- const p=state.player;playerSprite.x=p.x;playerSprite.y=p.y+Math.sin(p.anim)* (p.moving?3.2:1.1);playerSprite.scale.set(playerBaseScaleX,playerBaseScaleY*(1+Math.sin(p.anim*2)*.025));playerSprite.rotation=p.angle*.035+(p.swing>0?Math.sin((.22-p.swing)/.22*Math.PI)*.16:0);
- gl.ellipse(p.x,p.y+3,12,6).fill({color:"#e6c77d",alpha:.22});
- if(p.swing>0){const a=p.angle,progress=1-p.swing/.22;gl.arc(p.x,p.y,21,a-1.05+progress*.25,a+1.05+progress*.25).stroke({color:"#ffe2a0",width:5,alpha:Math.sin(progress*Math.PI)*.68});fx.arc(p.x,p.y,20,a-1.05+progress*.25,a+1.05+progress*.25).stroke({color:"#fff4c9",width:2,alpha:Math.sin(progress*Math.PI)})}
- for(const q of state.projectiles){gl.circle(q.x,q.y,q.size*3).fill({color:q.color,alpha:.32});fx.circle(q.x,q.y,q.size).fill(q.color);fx.circle(q.x,q.y,q.size*.45).fill("#ffffff")}
- particles.draw(fx);
- for(const f of state.effects){const alpha=Math.min(1,f.life*2);if(f.ring){const radius=(.42-f.life)*62;gl.circle(f.x,f.y,radius).stroke({color:f.color,width:2,alpha:alpha*.65})}else fx.circle(f.x,f.y,7+f.life*8).fill({color:f.color,alpha:alpha*.18})}
- app.renderer.render(app.stage);
+function update(dt){elapsed+=dt;state.spawn-=dt;state.attack-=dt;if(state.spawn<=0&&state.enemies.filter(e=>e.type!=='boss').length<5){enemySpawn();state.spawn=rand(1.6,2.6)}
+ if(state.stage===6&&!state.boss&&state.kills>14){enemySpawn(true);state.stage=7;toast('首領降臨！')}
+ let target=state.enemies.slice().sort((a,b)=>Math.hypot(a.x-state.x,a.y-state.y)-Math.hypot(b.x-state.x,b.y-state.y))[0];
+ if(target){const d=Math.hypot(target.x-state.x,target.y-state.y),job=jobs[state.job];if(d>job.range){state.x+=(target.x-state.x)/d*job.speed*dt*42;state.y+=(target.y-state.y)/d*job.speed*dt*42}else if(state.attack<=0){let dmg=job.damage+state.level*2;damageEnemy(target,dmg);state.attack=.95/job.speed;if(Math.random()<.25){state.mp=Math.min(state.maxMp,state.mp+1);state.particles.push({x:target.x,y:target.y-8,life:1,r:4,color:'#d6b46f'})}}}
+ for(const e of state.enemies){e.attack-=dt;e.hit=Math.max(0,e.hit-dt);const d=Math.hypot(state.x-e.x,state.y-e.y);if(d>35){e.x+=(state.x-e.x)/d*e.spd*dt;e.y+=(state.y-e.y)/d*e.spd*dt}else if(e.attack<=0){let dmg=e.atk;if(state.es>0){const absorbed=Math.min(state.es,dmg);state.es-=absorbed;dmg-=absorbed}state.hp=Math.max(0,state.hp-dmg);e.attack=2.1;spawnFloat(state.x,state.y-65,'-'+Math.round(e.atk),'hit');if(state.hp<=0){state.hp=state.maxHp;state.es=state.maxEs;state.enemies=[];state.x=W*.5;state.y=H*.66;toast('你在聖庭中倒下，已於入口重整')} }}
+ if(state.hp<state.maxHp&&Math.random()<dt*.22)state.hp=Math.min(state.maxHp,state.hp+.25);
+ state.es=Math.min(state.maxEs,state.es+dt*1.2);state.mp=Math.min(state.maxMp,state.mp+dt*.8);
+ $('hpfill').style.height=(state.hp/state.maxHp*100)+'%';$('hptext').textContent=Math.ceil(state.hp)+' / '+state.maxHp;$('mptext').textContent='MP '+Math.floor(state.mp);$('estext').textContent='ES '+Math.floor(state.es);
+ if(state.boss){$('bossfill').style.width=Math.max(0,state.boss.hp/state.boss.max*100)+'%'}
+ // keep hero within the visible combat field
+ state.x=Math.max(34,Math.min(W-34,state.x));state.y=Math.max(H*.28,Math.min(H*.79,state.y));
 }
-function loop(now){const dt=Math.min(.05,(now-last)/1000||0);last=now;step(dt,now);particles.update(dt);draw(dt);updateHud();requestAnimationFrame(loop)}
-function closePanel(){state.activeTab=null;$("panel").classList.remove("open");document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"))}
-function renderPanel(){const tab=state.activeTab;if(!tab)return;let body="";if(tab==="bag"){body+='<div class="card"><div class="row"><b>角色屬性</b><span class="tag">無職業限制</span></div><div class="stat">攻擊 '+state.atk.toFixed(1)+'　防禦 '+state.def+'　生命 '+Math.round(state.maxHp)+'<br>攻速 '+state.attackSpeed.toFixed(2)+'　施法 '+state.castSpeed.toFixed(2)+'　移速 '+state.moveSpeed.toFixed(2)+'</div></div><div class="row"><b>裝備背包</b><span class="muted">'+state.inventory.length+' 件</span></div>';if(!state.inventory.length)body+='<div class="card muted">尚未取得裝備，繼續探索秘境尋找掉落。</div>';state.inventory.forEach(g=>{body+='<div class="item"><div class="row"><h3 class="'+g.rarity+'">'+g.name+'</h3><span class="tag">'+({common:"普通",rare:"稀有",epic:"史詩",legend:"傳說"}[g.rarity])+'</span></div><p>'+g.desc+'</p><div class="row"><span class="muted">'+(g.equipped?"已裝備":"未裝備")+'</span><button class="btn" data-equip="'+g.id+'" '+(g.equipped?"disabled":"")+'>'+(g.equipped?"使用中":"裝備")+'</button></div></div>'})}
-if(tab==="talent"){body+='<div class="card"><b>天賦構築</b><p class="muted" style="font-size:11px">沒有職業限制，依照想玩的流派自由配置。</p><div class="stat">已配置 '+state.talents.length+' / 6 點</div></div>';talentDefs.forEach((t,i)=>{const on=state.talents.includes(i);body+='<div class="item"><div class="row"><h3>'+t.name+'</h3><button class="btn" data-talent="'+i+'" '+(on||state.talents.length>=6?"disabled":"")+'>'+(on?"已學習":"學習")+'</button></div><p>'+t.desc+'</p></div>'});body+='<button class="btn" id="resetTalents">重置天賦</button>'}
-if(tab==="skill"){body+='<div class="card"><b>自動技能配置</b><p class="muted" style="font-size:11px">啟用技能會依照冷卻與觸發條件自動施放。</p><div class="stat">已啟用 '+state.skills.length+' 種技能</div></div>';skillDefs.forEach(s=>{const on=state.skills.includes(s.name);body+='<div class="item"><div class="row"><h3>'+s.name+'</h3><button class="btn" data-skill="'+s.name+'">'+(on?"停用":"啟用")+'</button></div><p>'+s.desc+'</p></div>'})}
-$("panel").innerHTML='<div class="panelhead"><h2>'+(tab==="bag"?"背包":tab==="talent"?"天賦":"技能")+'</h2><button class="close" id="closePanel">返回戰鬥</button></div>'+body;$("panel").classList.add("open");$("closePanel").onclick=closePanel;
-$("panel").querySelectorAll("[data-equip]").forEach(b=>b.onclick=()=>{const g=state.inventory.find(x=>x.id===b.dataset.equip);if(g)equip(g)});
-$("panel").querySelectorAll("[data-talent]").forEach(b=>b.onclick=()=>{const i=+b.dataset.talent;if(!state.talents.includes(i)&&state.talents.length<6){state.talents.push(i);recalc();renderPanel();updateHud()}});
-$("panel").querySelectorAll("[data-skill]").forEach(b=>b.onclick=()=>{const n=b.dataset.skill;state.skills=state.skills.includes(n)?state.skills.filter(x=>x!==n):[...state.skills,n];renderPanel()});
-const reset=$("resetTalents");if(reset)reset.onclick=()=>{state.talents=[];recalc();renderPanel();updateHud()}}
-document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{const t=b.dataset.tab;if(state.activeTab===t){closePanel();return}state.activeTab=t;document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("active",x===b));renderPanel()}));
-async function init(){recalc();updateHud();const ok=await setupRenderer();if(!ok)return;for(let i=0;i<4;i++)spawnEnemy();last=performance.now();requestAnimationFrame(loop)}
-init();
+function loop(ts){if(!state.lastTime)state.lastTime=ts;const dt=Math.min(.04,(ts-state.lastTime)/1000);state.lastTime=ts;update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+function save(){try{localStorage.setItem('ashen-oath-save-v1',JSON.stringify({level:state.level,hp:state.hp,mp:state.mp,es:state.es,xp:state.xp,nextXp:state.nextXp,gold:state.gold,kills:state.kills,stage:state.stage,job:state.job,talent:state.talent,inventory:state.inventory,gear:state.gear,autoLoot:state.autoLoot,at:Date.now()}))}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem('ashen-oath-save-v1'));if(d)Object.assign(state,d)}catch(e){}}
+load();
+function open(tab=state.tab){state.drawer=true;state.tab=tab;$('drawer').classList.add('open');$('scrim').classList.add('open');renderPanel()}
+function close(){state.drawer=false;$('drawer').classList.remove('open');$('scrim').classList.remove('open');save()}
+$('menuBtn').onclick=()=>open();$('closeBtn').onclick=close;$('scrim').onclick=close;
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(!b)return;state.tab=b.dataset.tab;renderPanel()});
+function renderPanel(){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===state.tab));const titles={character:'角色狀態',equipment:'裝備配置',inventory:'戰利品背包',skills:'技能配置',talents:'天賦核心',stage:'章節關卡'};$('panelTitle').textContent=titles[state.tab];const c=$('panelContent');
+ if(state.tab==='character'){c.innerHTML='<p class="panel-note">戰鬥持續進行中。角色會自動尋敵、接近目標並施放攻擊。你可以在此調整構築，不會暫停戰場。</p><div class="card"><div class="row"><h3>流派職業</h3><span class="gold">Lv. '+state.level+'</span></div><div class="skillgrid">'+Object.entries(jobs).map(([k,j])=>'<div class="skillcard"><span class="big">'+j.icon+'</span><b>'+j.name+'</b><p>'+j.desc+'</p><button class="action" data-job="'+k+'">'+(state.job===k?'目前職業':'切換職業')+'</button></div>').join('')+'</div></div><div class="statgrid"><div class="stat"><b>'+state.maxHp+'</b><span>生命上限</span></div><div class="stat"><b>'+state.maxMp+'</b><span>魔力上限</span></div><div class="stat"><b>'+state.maxEs+'</b><span>能量護盾</span></div><div class="stat"><b>'+state.gold+'</b><span>金幣</span></div></div><div class="card"><div class="row"><h3>角色經驗</h3><span class="muted">'+state.xp+' / '+state.nextXp+'</span></div><div class="bar"><i style="width:'+Math.min(100,state.xp/state.nextXp*100)+'%;background:linear-gradient(90deg,#92724b,#e2c184)"></i></div><p class="muted">擊敗怪物獲得經驗。升級自動提升基礎屬性，並獲得 1 點天賦點。</p></div><div class="card"><div class="row"><h3>戰鬥統計</h3><span class="muted">本次冒險</span></div><div class="statgrid"><div class="stat"><b>'+state.kills+'</b><span>擊殺數</span></div><div class="stat"><b>'+state.inventory.length+'</b><span>背包物品</span></div></div></div>'}
+ if(state.tab==='equipment'){c.innerHTML='<p class="panel-note">每件裝備具有 0～3 個插槽。輔助寶石鑲嵌於裝備本身，寶石效果會與裝備詞綴共同作用。</p>'+gearKeys.map((k,i)=>{const it=state.gear[k];return '<div class="card"><div class="row"><div class="row"><div class="itemicon">'+['⚔','♜','▣','♢','⌁','◉'][i]+'</div><div><h3>'+gearNames[i]+'</h3><span class="muted">'+(it?it.name:'尚未裝備')+'</span></div></div>'+(it?'<button class="action" data-unequip="'+k+'">卸下</button>':'<span class="muted">空欄位</span>')+'</div>'+(it?'<div class="muted '+it.rarity+'">'+it.desc+' · 傷害 '+it.damage+'</div><div class="slotrow">'+Array.from({length:it.sockets},(_,n)=>'<span class="socket '+(it.gems&&it.gems[n]?'filled':'')+'" title="'+(it.gems&&it.gems[n]?it.gems[n].name:'空插槽')+'"></span>').join('')+'</div>':'')+'</div>'}).join('')+'<div class="card"><h3>裝備規則</h3><p class="muted">更換裝備不會摧毀原裝備。插槽數量在掉落時生成，傳奇裝備也不保證擁有三個插槽。</p></div>'}
+ if(state.tab==='inventory'){c.innerHTML='<div class="row" style="margin-bottom:10px"><p class="panel-note" style="margin:0">戰鬥中的戰利品會自動收集。</p><span class="gold">'+state.inventory.length+' 件</span></div>'+(state.inventory.length?state.inventory.slice().reverse().map((it,idx)=>{const real=state.inventory.length-1-idx;return '<div class="item"><div class="itemicon">'+it.icon+'</div><div class="iteminfo"><b class="'+(it.rarity||'rare')+'">'+it.name+'</b><small>'+it.desc+(it.kind==='gear'?' · '+it.sockets+' 插槽':'')+'</small></div>'+(it.kind==='gear'?'<button class="action" data-equip="'+real+'">裝備</button>':'<span class="muted">寶石</span>')+'</div>'}).join(''):'<div class="card"><h3>背包空空如也</h3><p class="muted">繼續戰鬥，裝備與輔助寶石將會陸續掉落。</p></div>')+'<div class="card"><div class="row"><div><h3>自動拾取</h3><span class="muted">戰鬥中自動收集掉落物</span></div><button class="action" id="lootToggle">'+(state.autoLoot?'已開啟':'已關閉')+'</button></div></div>'}
+ if(state.tab==='skills'){c.innerHTML='<p class="panel-note">主動技能來自職業技能庫，不需要靠怪物掉落取得。角色會依照戰鬥情境自動施放。</p><div class="card"><h3>'+jobs[state.job].name+' · 職業技能</h3><div class="skillgrid">'+skillBook.slice(0,6).map((s,i)=>'<div class="skillcard"><span class="big">'+s[1]+'</span><b>'+s[0]+'</b><p>'+s[2]+'</p><span class="muted">'+(i<3?'已配置':'技能庫')+'</span></div>').join('')+'</div></div><div class="card"><h3>自動施放邏輯</h3><p class="muted">範圍技能優先對付群怪，單體技能優先攻擊精英與首領；防禦技能會在生命危急時觸發。這是第一版的自動戰鬥規則。</p></div>'}
+ if(state.tab==='talents'){c.innerHTML='<p class="panel-note">升級獲得天賦點。第一版先提供可用的核心節點，之後擴展成完整的分支天賦網路。</p><div class="card"><div class="row"><h3>天賦點數</h3><span class="gold">'+state.talent+' 點可用</span></div><div style="display:flex;align-items:center;justify-content:center;gap:18px;padding:18px 0"><div class="node">✦</div><div style="color:#8e7958">━━</div><div class="node">⚔</div><div style="color:#8e7958">━━</div><div class="node">◈</div></div><div class="skillgrid"><div class="skillcard"><span class="big">⚔</span><b>武器精通</b><p>增加 5% 攻擊傷害。</p><button class="action" data-talent="damage" '+(state.talent<=0?'disabled':'')+'>投入天賦點</button></div><div class="skillcard"><span class="big">♥</span><b>堅韌血脈</b><p>增加 8% 最大生命。</p><button class="action" data-talent="life" '+(state.talent<=0?'disabled':'')+'>投入天賦點</button></div></div></div><div class="card"><h3>已投入天賦</h3><p class="muted">目前已投入 '+(state.talentSpent||0)+' 點。重置功能將在完整天賦樹階段加入。</p></div>'}
+ if(state.tab==='stage'){c.innerHTML='<p class="panel-note">每章六個戰鬥區域。前五關清理怪物，第六關挑戰章節首領。已解鎖關卡可自由重複刷取。</p><div class="card"><h3>第一章 · 腐朽聖庭</h3>'+Array.from({length:6},(_,i)=>'<div class="item"><div class="itemicon">'+(i===5?'♛':'⚔')+'</div><div class="iteminfo"><b>'+(i+1)+'. '+['灰燼庭院','破碎迴廊','血色祈禱室','枯井墓園','聖庭深處','墮落王座'][i]+'</b><small>'+(i===5?'章節首領 · 專屬傳奇掉落池':'固定戰鬥區域 · 普通與精英怪物')+'</small></div><button class="action" data-stage="'+(i+1)+'">'+(state.stage===i+1?'目前':'進入')+'</button></div>').join('')+'</div><div class="card"><h3>難度</h3><p class="muted">目前原型開放基礎難度。更高難度與專屬詞綴將在核心循環穩定後加入。</p></div>'}
+ c.querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{state.job=b.dataset.job;toast('已切換至 '+jobs[state.job].name);save();renderPanel()});
+ c.querySelectorAll('[data-equip]').forEach(b=>b.onclick=()=>{const it=state.inventory[+b.dataset.equip];if(!it||it.kind!=='gear')return;const old=state.gear[it.slot];state.gear[it.slot]=it;state.inventory.splice(+b.dataset.equip,1);if(old)state.inventory.push(old);toast('已裝備 '+it.name);save();renderPanel()});
+ c.querySelectorAll('[data-unequip]').forEach(b=>b.onclick=()=>{const it=state.gear[b.dataset.unequip];if(it){state.inventory.push(it);state.gear[b.dataset.unequip]=null;save();renderPanel()}});
+ c.querySelectorAll('[data-talent]').forEach(b=>b.onclick=()=>{if(state.talent<=0)return;state.talent--;state.talentSpent=(state.talentSpent||0)+1;if(b.dataset.talent==='damage')state.damageBonus=(state.damageBonus||0)+.05;else{state.maxHp=Math.round(state.maxHp*1.08);state.hp=state.maxHp}toast('天賦已強化');save();renderPanel()});
+ c.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{state.stage=+b.dataset.stage;state.enemies=[];state.boss=null;$('bossbar').classList.remove('show');state.spawn=.3;if(state.stage===6){enemySpawn(true)}toast('進入第 '+state.stage+' 關');save();renderPanel()});
+ const lt=c.querySelector('#lootToggle');if(lt)lt.onclick=()=>{state.autoLoot=!state.autoLoot;renderPanel();save()};
+}
+setInterval(save,12000);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
+addEventListener('pagehide',save);
+toast('戰鬥開始 · 角色正在自動清理聖庭');
 })();
-</script></body></html>
+</script>
+</body></html>
