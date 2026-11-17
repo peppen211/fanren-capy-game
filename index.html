@@ -13,7 +13,7 @@
 #world:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,6,10,.08),rgba(8,6,10,.12) 45%,rgba(8,6,10,.48));pointer-events:none}
 .ruin{position:absolute;inset:0;opacity:.9;pointer-events:none}
 .ruin svg{width:100%;height:100%;display:block}
-#battle{position:absolute;inset:0;width:100%;height:100%;z-index:2}
+#battle{position:absolute;inset:0;display:block;width:100%;height:100%;z-index:2;transform:translateZ(0);backface-visibility:hidden;}
 .vignette{position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(90deg,rgba(8,7,10,.16),transparent 18%,transparent 82%,rgba(8,7,10,.16)),linear-gradient(0deg,rgba(5,5,8,.34),transparent 20%,transparent 76%,rgba(7,6,9,.08))}
 .topbar{position:absolute;z-index:6;top:env(safe-area-inset-top,0);left:0;right:0;padding:12px 16px 0;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
 .brand{font-family:Cinzel,serif;letter-spacing:.17em;font-size:12px;color:#d9bf8b;text-shadow:0 2px 12px #000}
@@ -138,7 +138,7 @@ const gearNames=['武器','頭盔','胸甲','手套','靴子','戒指'],gearKeys
 const names=['腐化侍從','裂爪獵犬','灰燼行刑者','聖庭看守','墮落的守門者'];
 const gemPool=[['鋒銳寶石','◆','增加技能傷害'],['迅捷寶石','◇','增加攻擊速度'],['灼熱寶石','✦','附加火焰傷害'],['汲魂寶石','◉','造成傷害時恢復生命'],['擴張寶石','✧','增加技能範圍']];
 let W=0,H=0,dpr=1,elapsed=0,lastSkillUiStep=-1;
-function resize(){const r=canvas.getBoundingClientRect();dpr=1;W=r.width;H=r.height;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);if(!state.x){state.x=W*.5;state.y=H*.66}}
+function resize(){const r=canvas.getBoundingClientRect();W=r.width;H=r.height;dpr=Math.min(2,Math.max(1,window.devicePixelRatio||1));canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);if(!state.x){state.x=W*.5;state.y=H*.66}}
 addEventListener('resize',resize);resize();
 function rand(a,b){return a+Math.random()*(b-a)}
 function enemySpawn(boss=false){const pad=28,top=H*.27,bottom=H*.78;let x=W*.5,y=H*.43;if(!boss){const side=Math.floor(Math.random()*8);if(side===0){x=rand(pad,W-pad);y=top}else if(side===1){x=rand(pad,W-pad);y=bottom}else if(side===2){x=pad;y=rand(top,bottom)}else if(side===3){x=W-pad;y=rand(top,bottom)}else{x=(side===4||side===6)?pad:W-pad;y=(side===4||side===5)?top:bottom}}const type=boss?'boss':Math.random()<.16?'elite':'normal';const e={id:Math.random(),type,name:boss?names[4]:names[Math.floor(Math.random()*4)],x,y,hp:boss?560:type==='elite'?115:Math.round(rand(40,70)),max:boss?560:type==='elite'?115:70,spd:boss?12:type==='elite'?23:rand(18,29),atk:boss?14:type==='elite'?11:rand(5,9),size:boss?44:type==='elite'?24:19,phase:rand(0,6),attack:rand(1,3),hit:0};state.enemies.push(e);if(boss){state.boss=e;$('bossbar').classList.add('show');$('bossname').textContent=e.name}}
@@ -169,7 +169,7 @@ function drawEnemy(e,t){
  const bw=e.type==='boss'?52:e.type==='elite'?34:28,bh=e.type==='boss'?5:3,top=e.y-(e.type==='boss'?e.size+14:e.type==='elite'?51:43);
  if(e.hp<e.max){ctx.fillStyle='rgba(0,0,0,.72)';ctx.fillRect(e.x-bw/2,top,bw,bh);ctx.fillStyle=e.type==='boss'?'#c55b55':e.type==='elite'?'#c58b61':'#a64a4a';ctx.fillRect(e.x-bw/2,top,bw*Math.max(0,e.hp/e.max),bh)}
 }
-function draw(){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#100d12';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.restore();ctx.setTransform(dpr,0,0,dpr,0,0);const t=elapsed;
+function draw(){ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';ctx.filter='none';ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#100d12';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.setTransform(dpr,0,0,dpr,0,0);const t=elapsed;
  // Paint environment and actors into one opaque canvas layer.
  if(renderDiag==='actors'){ctx.fillStyle='#24202a';ctx.fillRect(0,0,W,H)}else if(sceneBg.complete&&sceneBg.naturalWidth){const scale=Math.max(W/sceneBg.width,H/sceneBg.height),bw=sceneBg.width*scale,bh=sceneBg.height*scale;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.filter='brightness(1.12) saturate(1.08) contrast(1.06)';ctx.drawImage(sceneBg,(W-bw)/2,(H-bh)/2,bw,bh);ctx.filter='none'}else{ctx.fillStyle='#100d12';ctx.fillRect(0,0,W,H)}if(renderDiag==='bg')return;
  // ground mist and embers
