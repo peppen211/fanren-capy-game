@@ -144,15 +144,9 @@ function drop(e){const roll=Math.random();let item=null;if(e.type==='boss'&&Math
 function kill(e){state.kills++;state.xp+=e.type==='boss'?120:e.type==='elite'?28:12;drop(e);if(state.xp>=state.nextXp){state.xp-=state.nextXp;state.level++;state.nextXp=Math.round(state.nextXp*1.28);state.maxHp+=9;state.hp=state.maxHp;state.maxMp+=4;state.mp=state.maxMp;state.talent++;toast('角色升級！獲得 1 點天賦點')}if(e.type==='boss'){state.unlockedStage=Math.max(state.unlockedStage||1,6);state.boss=null;state.stage=6;$('bossbar').classList.remove('show');toast('章節首領已擊敗！')}save()}
 function damageEnemy(e,n){const dealt=Math.min(e.hp,n);const stats=buildStats();if(stats.leech>0&&dealt>0){const heal=dealt*stats.leech;state.hp=Math.min(state.maxHp,state.hp+heal)}e.hp-=n;e.hit=.16;spawnFloat(e.x,e.y-e.size,n.toString(),'hit');if(e.hp<=0){state.enemies=state.enemies.filter(x=>x!==e);kill(e)}}
 function drawCleanEnvironment(t){
- ctx.fillStyle='#17141b';ctx.fillRect(0,0,W,H);
- const glow=ctx.createRadialGradient(W*.5,H*.43,8,W*.5,H*.43,Math.max(W,H)*.78);
- glow.addColorStop(0,'#40303a');glow.addColorStop(.48,'#28212b');glow.addColorStop(1,'#100e14');
- ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
- const pillar=(x,w,h,a)=>{ctx.save();ctx.globalAlpha=a;const g=ctx.createLinearGradient(x,0,x+w,0);g.addColorStop(0,'#100f16');g.addColorStop(.45,'#51404a');g.addColorStop(1,'#17141c');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(x+w*.18,0);ctx.lineTo(x+w*.82,0);ctx.lineTo(x+w*.76,h*.82);ctx.lineTo(x+w,h);ctx.lineTo(x,h);ctx.lineTo(x+w*.24,h*.82);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(190,145,112,.12)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+w*.28,0);ctx.lineTo(x+w*.34,h*.78);ctx.stroke();ctx.restore()};
- pillar(-W*.04,W*.19,H*.66,.72);pillar(W*.85,W*.2,H*.58,.62);pillar(W*.16,W*.08,H*.28,.28);pillar(W*.76,W*.07,H*.32,.3);
- const floor=ctx.createRadialGradient(W*.5,H*.72,5,W*.5,H*.72,Math.max(W,H)*.62);floor.addColorStop(0,'rgba(116,77,67,.26)');floor.addColorStop(.55,'rgba(63,47,54,.18)');floor.addColorStop(1,'rgba(12,10,16,0)');ctx.fillStyle=floor;ctx.fillRect(0,0,W,H);
- for(let i=0;i<18;i++){const x=(i*137)%Math.max(1,W),y=H*(.38+((i*29)%55)/100),r=18+(i%5)*11;const p=ctx.createRadialGradient(x,y,1,x,y,r);p.addColorStop(0,'rgba(174,119,91,.055)');p.addColorStop(1,'rgba(174,119,91,0)');ctx.fillStyle=p;ctx.beginPath();ctx.ellipse(x,y,r*1.5,r*.72,(i%4)*.35,0,Math.PI*2);ctx.fill()}
- const haze=ctx.createRadialGradient(W*.5,H*.28,1,W*.5,H*.28,W*.46);haze.addColorStop(0,'rgba(190,116,93,.13)');haze.addColorStop(1,'rgba(190,116,93,0)');ctx.fillStyle=haze;ctx.fillRect(0,0,W,H);
+ // Intentionally use a flat solid-color battlefield with no background artwork.
+ ctx.fillStyle='#17141b';
+ ctx.fillRect(0,0,W,H);
 }
 function drawHero(x,y,t){
  ctx.save();const bob=Math.sin(t*5)*1.4;
