@@ -108,6 +108,13 @@ const $=id=>document.getElementById(id), canvas=$('battle'),ctx=canvas.getContex
 // Use one opaque render surface for both environment and combat to avoid
 // iOS Safari seams between a transparent canvas and the CSS background.
 const renderDiag=new URLSearchParams(location.search).get('diag');
+if(renderDiag==='ui'){
+  $('world').style.display='none';
+  const uiOnly=document.createElement('style');
+  uiOnly.textContent='#game{background:#24202a}.topbar,.bossbar,.hud,.panel-scrim,.drawer,.toast{display:none!important}';
+  document.head.appendChild(uiOnly);
+}
+
 const sceneBg=new Image();
 const worldBg=getComputedStyle($('world')).backgroundImage;
 const embeddedBg=worldBg.match(/url\(["']?(.*?)["']?\)/);
