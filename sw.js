@@ -1,4 +1,4 @@
-const CACHE='ashen-oath-shell-v21';
+const CACHE='ashen-oath-shell-v22';
 const CORE=['./','./index.html','./manifest.webmanifest','./icon.svg','./assets/sprites/ashen-knight.webp','./assets/backgrounds/ashen-courtyard.webp','./assets/monsters/ash-wraith.webp'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
