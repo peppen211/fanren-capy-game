@@ -1,0 +1,28 @@
+{
+  "project": "Ashen Oath",
+  "version": "0.2.0-art-foundation",
+  "status": "source-assets-prepared-not-yet-runtime-integrated",
+  "target": {
+    "orientation": "portrait",
+    "battlefield": "full-screen",
+    "camera": "follow-player",
+    "hud": "fixed-overlay",
+    "combatWhilePanelsOpen": true
+  },
+  "animationStates": ["idle", "move", "attack", "hit", "death"],
+  "assetPackage": "ashen-oath-art-foundation-v1.zip",
+  "assets": [
+    {"id":"environment.chapter1","path":"environments/ashen-courtyard-master.webp","status":"source-ready"},
+    {"id":"hero.ashenKnight","path":"characters/ashen-knight/ashen-knight-4x2-sheet.webp","status":"sheet-generated-frame-validation-required","columns":4,"rows":2},
+    {"id":"monster.ashWraith","path":"monsters/ash-wraith/ash-wraith-4-frame.webp","status":"sheet-generated-frame-validation-required","columns":4,"rows":1},
+    {"id":"monster.skeletalRevenant","path":"monsters/skeletal-revenant/skeletal-revenant-source-sheet.webp","status":"reference-only-checkerboard-background-not-alpha","columns":4,"rows":1},
+    {"id":"ui.orbFrame","path":"ui/life-mana-orb/ornate-orb-frame.webp","status":"frame-only-liquid-layers-required"}
+  ],
+  "qualityGates": [
+    "verify true alpha channel",
+    "verify sprite frame bounds and alignment",
+    "standardize foot anchors and in-game scale",
+    "test mobile portrait readability",
+    "replace placeholder geometry and emoji art before art-complete status"
+  ]
+}
