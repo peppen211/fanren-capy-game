@@ -1,0 +1,13 @@
+{
+  "name": "灰燼誓約 · Ashen Oath",
+  "short_name": "灰燼誓約",
+  "description": "暗黑奇幻自動戰鬥刷寶原型",
+  "lang": "zh-Hant",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#100d12",
+  "theme_color": "#100d12",
+  "icons": [{"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
