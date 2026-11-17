@@ -114,6 +114,11 @@ if(renderDiag==='ui'){
   uiOnly.textContent='#game{background:#24202a}';
   document.head.appendChild(uiOnly);
 }
+if(renderDiag==='skillfx'){
+  const skillFxTest=document.createElement('style');
+  skillFxTest.textContent='.skill .cooldown{display:none!important}';
+  document.head.appendChild(skillFxTest);
+}
 
 const sceneBg=new Image();
 const worldBg=getComputedStyle($('world')).backgroundImage;
