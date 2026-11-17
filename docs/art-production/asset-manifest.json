@@ -9,14 +9,58 @@
     "hud": "fixed-overlay",
     "combatWhilePanelsOpen": true
   },
-  "animationStates": ["idle", "move", "attack", "hit", "death"],
+  "animationStates": [
+    "idle",
+    "move",
+    "attack",
+    "hit",
+    "death"
+  ],
   "assetPackage": "ashen-oath-art-foundation-v1.zip",
   "assets": [
-    {"id":"environment.chapter1","path":"environments/ashen-courtyard-master.webp","status":"source-ready"},
-    {"id":"hero.ashenKnight","path":"characters/ashen-knight/ashen-knight-4x2-sheet.webp","status":"sheet-generated-frame-validation-required","columns":4,"rows":2},
-    {"id":"monster.ashWraith","path":"monsters/ash-wraith/ash-wraith-4-frame.webp","status":"sheet-generated-frame-validation-required","columns":4,"rows":1},
-    {"id":"monster.skeletalRevenant","path":"monsters/skeletal-revenant/skeletal-revenant-source-sheet.webp","status":"reference-only-checkerboard-background-not-alpha","columns":4,"rows":1},
-    {"id":"ui.orbFrame","path":"ui/life-mana-orb/ornate-orb-frame.webp","status":"frame-only-liquid-layers-required"}
+    {
+      "id": "environment.chapter1",
+      "path": "environments/ashen-courtyard-master.webp",
+      "status": "source-ready"
+    },
+    {
+      "id": "hero.ashenKnight",
+      "path": "characters/ashen-knight/ashen-knight-4x2-sheet.webp",
+      "status": "sheet-generated-frame-validation-required",
+      "columns": 4,
+      "rows": 2
+    },
+    {
+      "id": "monster.ashWraith",
+      "path": "monsters/ash-wraith/ash-wraith-4-frame.webp",
+      "status": "sheet-generated-frame-validation-required",
+      "columns": 4,
+      "rows": 1
+    },
+    {
+      "id": "monster.skeletalRevenant",
+      "path": "monsters/skeletal-revenant/skeletal-revenant-source-sheet.webp",
+      "status": "reference-only-checkerboard-background-not-alpha",
+      "columns": 4,
+      "rows": 1
+    },
+    {
+      "id": "ui.orbFrame",
+      "path": "ui/life-mana-orb/ornate-orb-frame.webp",
+      "status": "frame-only-liquid-layers-required"
+    },
+    {
+      "id": "monster.skeletalRevenant",
+      "path": "monsters/skeletal-revenant/skeletal-revenant-source-sheet.webp",
+      "status": "source-reference-only-checkerboard-not-alpha",
+      "columns": 4,
+      "rows": 1
+    },
+    {
+      "id": "concept.portraitBattle",
+      "path": "concepts/portrait-battle-hud-reference.webp",
+      "status": "visual-reference-only-not-runtime"
+    }
   ],
   "qualityGates": [
     "verify true alpha channel",
