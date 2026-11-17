@@ -1,5 +1,5 @@
 const CACHE='ashen-oath-shell-v23';
-const CORE=['./','./index.html','./manifest.webmanifest','./icon.svg','./assets/sprites/ashen-knight.webp','./assets/backgrounds/ashen-courtyard.webp','./assets/monsters/ash-wraith.webp'];
+const CORE=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)));
