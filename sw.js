@@ -1,4 +1,4 @@
-const CACHE='ashen-oath-shell-v26';
+const CACHE='ashen-oath-shell-v27';
 const CORE=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
