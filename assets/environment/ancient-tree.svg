@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
+<defs><linearGradient id="b" x2="1" y2="1"><stop stop-color="#806044"/><stop offset=".48" stop-color="#493a2b"/><stop offset="1" stop-color="#202d25"/></linearGradient><radialGradient id="c"><stop stop-color="#a9cf69"/><stop offset=".58" stop-color="#548247"/><stop offset="1" stop-color="#203e30"/></radialGradient><filter id="s"><feGaussianBlur stdDeviation="5"/></filter></defs>
+<ellipse cx="157" cy="275" rx="116" ry="23" fill="#091b15" opacity=".34" filter="url(#s)"/>
+<path d="M154 268 C130 231 144 194 124 165 C103 135 91 119 73 103 M155 254 C177 214 166 184 193 151 C215 123 231 113 250 89 M148 227 C119 208 93 202 62 196 M171 211 C196 202 221 192 255 187" fill="none" stroke="#342d23" stroke-width="19" stroke-linecap="round"/>
+<path d="M154 268 C137 223 153 191 135 159 C119 132 99 115 75 99 M160 254 C180 218 169 183 197 150 C218 125 236 112 251 91" fill="none" stroke="url(#b)" stroke-width="13" stroke-linecap="round"/>
+<path d="M145 246 Q128 264 91 271 M164 250 Q190 269 224 272 M151 231 Q119 236 103 251 M175 223 Q207 229 231 245" fill="none" stroke="#59452f" stroke-width="7" stroke-linecap="round"/>
+<g fill="url(#c)" stroke="#244632" stroke-width="3">
+<path d="M35 102 Q24 64 65 45 Q81 10 122 31 Q153 0 184 29 Q223 12 245 48 Q287 52 283 91 Q307 121 275 143 Q263 174 222 160 Q193 184 161 161 Q125 181 98 154 Q54 170 48 135 Q18 127 35 102Z"/>
+<path d="M65 64 Q69 31 103 35 Q129 8 154 38 Q187 19 206 48 Q244 42 252 74 Q276 96 249 119 Q224 143 194 123 Q164 148 139 124 Q102 146 83 117 Q48 103 65 64Z" fill="#6d994e" opacity=".92"/>
+</g>
+<g fill="#b1d66e" opacity=".7"><circle cx="83" cy="65" r="10"/><circle cx="119" cy="47" r="8"/><circle cx="163" cy="57" r="9"/><circle cx="211" cy="69" r="11"/><circle cx="249" cy="99" r="8"/><circle cx="101" cy="112" r="7"/><circle cx="157" cy="103" r="10"/><circle cx="207" cy="126" r="8"/></g>
+<g stroke="#b2c978" stroke-width="2" opacity=".55" fill="none"><path d="M81 77q16-18 29-9m49-28q18-8 29 7m30 39q15-8 24 3M118 127q12-13 24-5"/></g>
+</svg>
