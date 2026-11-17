@@ -93,7 +93,7 @@ const gearPool=[
 {name:"分光劍匣",slot:"weapon",rarity:"legend",desc:"攻擊力 +18，劍氣可追加飛劍。",atk:18,proc:"分光"},
 {name:"雷紋護符",slot:"ring",rarity:"legend",desc:"攻擊力 +9，雷擊可額外連鎖。",atk:9,proc:"雷鏈"}
 ];
-let W=0,H=0,last=0,app=null,worldLayer=null,spriteLayer=null,glowLayer=null,fxLayer=null,artTextures={},spriteNodes=new Map(),playerSprite=null,playerBaseScaleX=1,playerBaseScaleY=1;
+let W=0,H=0,last=0,app=null,worldLayer=null,environmentLayer=null,spriteLayer=null,glowLayer=null,fxLayer=null,artTextures={},environmentSprites={},spriteNodes=new Map(),playerSprite=null,playerBaseScaleX=1,playerBaseScaleY=1;
 const particlePool=[];const floatingTexts=[];
 class ParticleEmitter{
  constructor(){this.items=[]}
@@ -107,16 +107,19 @@ async function setupRenderer(){
  app=new PIXI.Application();
  await app.init({resizeTo:world,background:"#17231f",antialias:true,resolution:Math.min(window.devicePixelRatio||1,2),autoDensity:true,powerPreference:"high-performance",autoStart:false,sharedTicker:false});
  world.replaceChildren(app.canvas);app.canvas.style.width="100%";app.canvas.style.height="100%";app.canvas.style.display="block";
- worldLayer=new PIXI.Graphics();spriteLayer=new PIXI.Container();glowLayer=new PIXI.Graphics();fxLayer=new PIXI.Graphics();
- app.stage.addChild(worldLayer,spriteLayer,glowLayer,fxLayer);
+ worldLayer=new PIXI.Graphics();environmentLayer=new PIXI.Container();spriteLayer=new PIXI.Container();glowLayer=new PIXI.Graphics();fxLayer=new PIXI.Graphics();
+ app.stage.addChild(worldLayer,environmentLayer,spriteLayer,glowLayer,fxLayer);
  try{glowLayer.filters=[new PIXI.BlurFilter({strength:4,quality:2})];glowLayer.blendMode="add"}catch(e){console.warn("Glow filter fallback",e)}
- const art={player:"assets/player-cultivator.svg",wolf:"assets/wolf-spirit.svg",golem:"assets/stone-golem.svg",wraith:"assets/wraith-spirit.svg"};
+ const art={player:"assets/player-cultivator.svg",wolf:"assets/wolf-spirit.svg",golem:"assets/stone-golem.svg",wraith:"assets/wraith-spirit.svg",tree:"assets/environment/ancient-tree.svg",bamboo:"assets/environment/bamboo-cluster.svg",rocks:"assets/environment/mossy-rock-cluster.svg",shrine:"assets/environment/forest-shrine.svg"};
  for(const [key,path] of Object.entries(art)){artTextures[key]=await PIXI.Assets.load(path)}
+ for(const key of ["tree","bamboo","rocks","shrine"]){const node=new PIXI.Sprite(artTextures[key]);node.anchor.set(.5,.85);node.alpha=.96;environmentLayer.addChild(node);environmentSprites[key]=node}
+ layoutEnvironment();
  playerSprite=new PIXI.Sprite(artTextures.player);playerSprite.anchor.set(.5,.62);playerSprite.width=42;playerSprite.height=48;playerBaseScaleX=playerSprite.scale.x;playerBaseScaleY=playerSprite.scale.y;spriteLayer.addChild(playerSprite);
  try{glowLayer.filters=[new PIXI.BlurFilter({strength:4,quality:2})];glowLayer.blendMode="add"}catch(e){console.warn("Glow filter fallback",e)}
  resize();return true
 }
-function resize(){if(!world)return;const r=world.getBoundingClientRect();W=r.width;H=r.height;if(!state.player.x){state.player.x=W/2;state.player.y=H/2}}
+function resize(){if(!world)return;const r=world.getBoundingClientRect();W=r.width;H=r.height;if(!state.player.x){state.player.x=W/2;state.player.y=H/2}layoutEnvironment()}
+function layoutEnvironment(){if(!environmentSprites.tree||!W||!H)return;const s=Math.min(W/390,H/720);const place=(key,x,y,w,h)=>{const n=environmentSprites[key];n.x=x*W;n.y=y*H;n.width=w*s;n.height=h*s};place("tree",.10,.13,174,174);place("bamboo",.91,.39,112,154);place("rocks",.87,.76,136,106);place("shrine",.12,.79,112,132)}
 window.addEventListener("resize",resize);
 function realmIndex(l=state.level){return Math.max(0,realms.findIndex(r=>l>=r.start&&l<=r.end))}
 function realm(){return realms[realmIndex()]}
